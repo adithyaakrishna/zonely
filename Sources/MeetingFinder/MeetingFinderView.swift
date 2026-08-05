@@ -117,16 +117,23 @@ struct MeetingFinderView: View {
         .frame(height: 24, alignment: .topLeading)
 
       ForEach(Array(model.state.cities.enumerated()), id: \.element.id) { index, city in
-        let time = city.localTime(at: model.state.selectedUTCHour)
+        let time = city.localTime(
+          at: model.state.selectedUTCHour,
+          on: model.state.referenceDate
+        )
         HStack(alignment: .firstTextBaseline, spacing: 4) {
           Text(time.label)
             .font(.system(size: 12.5, weight: .regular, design: .monospaced))
             .foregroundStyle(time.isWorkingHour ? city.color : Color.black.opacity(0.46))
+            .lineLimit(1)
+            .fixedSize(horizontal: true, vertical: false)
             .contentTransition(.numericText())
           if let dayLabel = time.dayLabel {
             Text(dayLabel)
               .font(.system(size: 9, weight: .regular, design: .monospaced))
               .foregroundStyle(Color.black.opacity(0.36))
+              .lineLimit(1)
+              .fixedSize(horizontal: true, vertical: false)
           }
         }
         .frame(height: cityRowHeight, alignment: .topLeading)
@@ -138,7 +145,6 @@ struct MeetingFinderView: View {
         )
       }
     }
-    .padding(.leading, 8)
   }
 
   private var cityRowHeight: CGFloat {
