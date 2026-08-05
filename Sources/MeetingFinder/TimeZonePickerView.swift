@@ -78,6 +78,10 @@ struct TimeZonePickerView: View {
   private var selectedTimeZones: some View {
     LazyVGrid(columns: selectedColumns, alignment: .leading, spacing: 7) {
       ForEach(model.state.cities) { city in
+        let relativeOffset = city.relativeOffsetLabel(
+          atUTC: model.state.selectedUTCHour,
+          on: model.state.referenceDate
+        )
         VStack(alignment: .leading, spacing: 3) {
           HStack(spacing: 4) {
             Circle()
@@ -90,14 +94,11 @@ struct TimeZonePickerView: View {
           }
 
           HStack(spacing: 2) {
-            Text(
-              city.offsetLabel(
-                atUTC: model.state.selectedUTCHour,
-                on: model.state.referenceDate
-              )
-            )
-            .font(.system(size: 9, design: .monospaced))
-            .foregroundStyle(.secondary)
+            Text(relativeOffset)
+              .font(.system(size: 8.5, design: .rounded))
+              .foregroundStyle(.secondary)
+              .lineLimit(1)
+              .minimumScaleFactor(0.72)
             Spacer(minLength: 0)
 
             Button {
@@ -122,9 +123,16 @@ struct TimeZonePickerView: View {
           RoundedRectangle(cornerRadius: 9)
             .strokeBorder(Color.primary.opacity(0.055), lineWidth: 0.5)
         }
-        .help(city.name)
+        .contentShape(RoundedRectangle(cornerRadius: 9, style: .continuous))
+        .help(selectedTimeZoneTooltip(for: city, relativeOffset: relativeOffset))
       }
     }
+  }
+
+  private func selectedTimeZoneTooltip(for city: City, relativeOffset: String) -> String {
+    let fullTimeZoneName =
+      TimeZone(identifier: city.id)?.localizedName(for: .generic, locale: .current) ?? city.id
+    return "\(city.name)\n\(fullTimeZoneName)\n\(city.id)\n\(relativeOffset)"
   }
 
   private var searchResults: some View {
@@ -196,7 +204,7 @@ private final class PopoverStylingView: NSView {
     super.viewDidMoveToWindow()
     DispatchQueue.main.async { [weak self] in
       guard let window = self?.window else { return }
-      window.hasShadow = false
+      window.hasShadow = true
       window.invalidateShadow()
     }
   }

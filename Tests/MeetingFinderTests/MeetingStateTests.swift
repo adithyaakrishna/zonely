@@ -47,6 +47,7 @@ struct MeetingStateTests {
       colorIndex: 4
     )
     #expect(kolkata.offsetLabel == "UTC+5:30")
+    #expect(kolkata.relativeOffsetLabel(atUTC: 20) == "5h 30m ahead of UTC")
     #expect(kolkata.localTime(at: 20) == LocalTime(hour: 1, minute: 30, dayOffset: 1))
   }
 
@@ -62,6 +63,8 @@ struct MeetingStateTests {
 
     #expect(newYork.utcOffsetMinutes(at: winter) == -300)
     #expect(newYork.utcOffsetMinutes(at: summer) == -240)
+    #expect(newYork.relativeOffsetLabel(atUTC: 12, on: winter) == "5h behind UTC")
+    #expect(newYork.relativeOffsetLabel(atUTC: 12, on: summer) == "4h behind UTC")
     #expect(newYork.localTime(at: 12, on: winter) == LocalTime(hour: 7, dayOffset: 0))
     #expect(newYork.localTime(at: 12, on: summer) == LocalTime(hour: 8, dayOffset: 0))
   }

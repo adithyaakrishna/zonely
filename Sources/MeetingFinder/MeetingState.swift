@@ -35,6 +35,20 @@ struct City: Identifiable, Equatable, Sendable {
     Self.formatOffset(utcOffsetMinutes(at: Self.utcDate(hour: utcHour, on: date)))
   }
 
+  func relativeOffsetLabel(atUTC utcHour: Int, on date: Date = Date()) -> String {
+    let minutes = utcOffsetMinutes(at: Self.utcDate(hour: utcHour, on: date))
+    guard minutes != 0 else { return "Same as UTC" }
+
+    let absoluteMinutes = abs(minutes)
+    let hours = absoluteMinutes / 60
+    let remainingMinutes = absoluteMinutes % 60
+    let duration =
+      remainingMinutes == 0
+      ? "\(hours)h"
+      : "\(hours)h \(remainingMinutes)m"
+    return "\(duration) \(minutes > 0 ? "ahead of" : "behind") UTC"
+  }
+
   func localTime(at utcHour: Int, on date: Date = Date()) -> LocalTime {
     let selectedDate = Self.utcDate(hour: utcHour, on: date)
     let unwrappedMinutes = (utcHour * 60) + utcOffsetMinutes(at: selectedDate)
