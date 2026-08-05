@@ -107,19 +107,26 @@ struct TimeZonePickerView: View {
             .minimumScaleFactor(0.68)
         }
         .overlay(alignment: .topTrailing) {
-          Button {
-            model.removeTimeZone(id: city.id)
-          } label: {
-            Image(systemName: "xmark")
-              .font(.system(size: 7, weight: .bold))
+          if model.state.cities.count == 1 {
+            Image(systemName: "info.circle")
+              .font(.system(size: 8, weight: .medium))
               .foregroundStyle(.secondary)
               .frame(width: 12, height: 12)
+              .contentShape(Rectangle())
+              .help("At least one time zone is required")
+              .accessibilityLabel("At least one time zone is required")
+          } else {
+            Button {
+              model.removeTimeZone(id: city.id)
+            } label: {
+              Image(systemName: "xmark")
+                .font(.system(size: 7, weight: .bold))
+                .foregroundStyle(.secondary)
+                .frame(width: 12, height: 12)
+            }
+            .buttonStyle(.plain)
+            .help("Remove \(city.name)")
           }
-          .buttonStyle(.plain)
-          .disabled(model.state.cities.count == 1)
-          .help(
-            model.state.cities.count == 1
-              ? "At least one time zone is required" : "Remove \(city.name)")
         }
         .padding(.horizontal, 6)
         .frame(height: 40)
