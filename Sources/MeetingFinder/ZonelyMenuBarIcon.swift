@@ -1,13 +1,7 @@
 import AppKit
 
 enum ZonelyMenuBarIcon {
-  private static let activeCells: [[Bool]] = [
-    [false, false, false, false, true, true, true, true, true, true],
-    [false, false, true, true, true, true, true, true, false, false],
-    [false, false, false, false, true, true, true, false, false, false],
-    [false, false, false, true, true, true, true, true, true, false],
-    [false, true, true, true, true, true, false, false, false, false],
-  ]
+  private static let center = NSPoint(x: 9, y: 9)
 
   static func makeImage() -> NSImage {
     let iconSize = NSSize(width: 18, height: 18)
@@ -15,8 +9,9 @@ enum ZonelyMenuBarIcon {
       NSGraphicsContext.saveGraphicsState()
       defer { NSGraphicsContext.restoreGraphicsState() }
 
-      drawAvailabilityGrid()
-      drawSelector()
+      drawClock()
+      drawSharedWindow()
+      drawHands()
       return true
     }
     image.isTemplate = true
@@ -24,42 +19,42 @@ enum ZonelyMenuBarIcon {
     return image
   }
 
-  private static func drawAvailabilityGrid() {
-    let cellSize = NSSize(width: 1.2, height: 1.8)
-    let columnGap: CGFloat = 0.38
-    let rowGap: CGFloat = 0.65
-    let gridWidth = (CGFloat(activeCells[0].count) * cellSize.width) + (9 * columnGap)
-    let gridHeight = (CGFloat(activeCells.count) * cellSize.height) + (4 * rowGap)
-    let origin = NSPoint(x: (18 - gridWidth) / 2, y: (18 - gridHeight) / 2)
-
-    for (rowIndex, row) in activeCells.enumerated() {
-      for (columnIndex, isActive) in row.enumerated() {
-        let x = origin.x + (CGFloat(columnIndex) * (cellSize.width + columnGap))
-        let y =
-          origin.y
-          + (CGFloat(activeCells.count - rowIndex - 1) * (cellSize.height + rowGap))
-        let cell = NSBezierPath(
-          roundedRect: NSRect(origin: NSPoint(x: x, y: y), size: cellSize),
-          xRadius: 0.42,
-          yRadius: 0.42
-        )
-        NSColor.black.withAlphaComponent(isActive ? 0.92 : 0.20).setFill()
-        cell.fill()
-      }
-    }
+  private static func drawClock() {
+    let clock = NSBezierPath(ovalIn: NSRect(x: 1.9, y: 1.9, width: 14.2, height: 14.2))
+    clock.lineWidth = 1.25
+    NSColor.black.setStroke()
+    clock.stroke()
   }
 
-  private static func drawSelector() {
-    let selector = NSBezierPath(
-      roundedRect: NSRect(x: 7.15, y: 0.9, width: 3.7, height: 16.2),
-      xRadius: 1.85,
-      yRadius: 1.85
+  private static func drawSharedWindow() {
+    let window = NSBezierPath(
+      roundedRect: NSRect(x: 7.05, y: 2.65, width: 3.9, height: 12.7),
+      xRadius: 1.95,
+      yRadius: 1.95
     )
+    NSColor.black.withAlphaComponent(0.14).setFill()
+    window.fill()
+    NSColor.black.setStroke()
+    window.lineWidth = 0.75
+    window.stroke()
+  }
 
-    NSColor.black.withAlphaComponent(0.10).setFill()
-    selector.fill()
-    NSColor.black.withAlphaComponent(0.96).setStroke()
-    selector.lineWidth = 0.85
-    selector.stroke()
+  private static func drawHands() {
+    let hands = NSBezierPath()
+    hands.move(to: center)
+    hands.line(to: NSPoint(x: center.x, y: 12.9))
+    hands.move(to: center)
+    hands.line(to: NSPoint(x: 12.1, y: center.y))
+    hands.lineWidth = 1.35
+    hands.lineCapStyle = .round
+    hands.lineJoinStyle = .round
+    NSColor.black.setStroke()
+    hands.stroke()
+
+    let centerPoint = NSBezierPath(
+      ovalIn: NSRect(x: center.x - 0.8, y: center.y - 0.8, width: 1.6, height: 1.6)
+    )
+    NSColor.black.setFill()
+    centerPoint.fill()
   }
 }

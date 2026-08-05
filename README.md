@@ -32,7 +32,7 @@ Zonely requires macOS 14 or later.
 
 1. Download the latest signed and notarized DMG from [Releases](https://github.com/adithyaakrishna/zonely/releases).
 2. Open the DMG and drag **Zonely** into **Applications**.
-3. Launch Zonely. Its grid-and-selector icon appears in the menu bar.
+3. Launch Zonely. Its clock-and-selector icon appears in the menu bar.
 
 Release downloads are universal binaries for Apple silicon and Intel Macs. SHA-256 checksum files are published beside every DMG and ZIP.
 

@@ -5,7 +5,7 @@ import Testing
 
 struct MeetingStateTests {
   @MainActor
-  @Test func menuBarIconUsesTheAppIconMotifAsATemplate() {
+  @Test func menuBarIconUsesTheSharedHourMotifAsATemplate() {
     let icon = ZonelyMenuBarIcon.makeImage()
 
     #expect(icon.size == CGSize(width: 18, height: 18))
