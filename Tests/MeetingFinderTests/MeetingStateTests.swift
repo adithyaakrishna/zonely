@@ -5,11 +5,11 @@ import Testing
 
 struct MeetingStateTests {
   @MainActor
-  @Test func menuBarIconUsesTheSharedHourMotifAsATemplate() {
+  @Test func menuBarIconUsesTheFullColorApplicationArtwork() {
     let icon = ZonelyMenuBarIcon.makeImage()
 
     #expect(icon.size == CGSize(width: 18, height: 18))
-    #expect(icon.isTemplate)
+    #expect(!icon.isTemplate)
     #expect(icon.accessibilityDescription == "Zonely")
   }
 
