@@ -140,6 +140,8 @@ struct MeetingStateTests {
     #expect(rowsHeight <= TimelineMetrics.availableHeight)
     #expect(TimelineMetrics.rowHeight(for: 5) == 29)
     #expect(TimelineMetrics.rowHeight(for: 6) == 26)
+    #expect(TimelineMetrics.cellHeight(for: 6) == 20)
+    #expect(TimelineMetrics.timeLabelGap == 10)
   }
 
   @Test func atLeastOneTimeZoneMustRemain() {

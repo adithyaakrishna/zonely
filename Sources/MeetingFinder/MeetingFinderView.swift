@@ -4,7 +4,9 @@ import SwiftUI
 enum TimelineMetrics {
   static let availableHeight: CGFloat = 182
   static let labelHeight: CGFloat = 24
-  static let rowGap: CGFloat = 4
+  static let rowGap: CGFloat = 6
+  static let hourGap: CGFloat = 3.5
+  static let timeLabelGap: CGFloat = 10
 
   static func rowHeight(for cityCount: Int) -> CGFloat {
     switch cityCount {
@@ -103,11 +105,12 @@ struct MeetingFinderView: View {
 
       TimelineGrid(model: model, reorderSession: reorderSession)
         .frame(width: 300, height: TimelineMetrics.availableHeight)
+        .padding(.trailing, TimelineMetrics.timeLabelGap)
 
       selectedTimeLabels
         .frame(width: 64, height: TimelineMetrics.availableHeight, alignment: .topLeading)
     }
-    .padding(.horizontal, 14)
+    .padding(.horizontal, 9)
     .padding(.vertical, 14)
     .frame(height: 210)
     .background(Color.white.opacity(0.96))
@@ -252,7 +255,7 @@ private struct TimelineGrid: View {
   @State private var isPointerInsideGrid = false
 
   private let labelHeight = TimelineMetrics.labelHeight
-  private let cellGap: CGFloat = 2.5
+  private let cellGap = TimelineMetrics.hourGap
   private let rowGap = TimelineMetrics.rowGap
   private let gridWidth: CGFloat = 300
 

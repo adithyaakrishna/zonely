@@ -4,10 +4,10 @@ import SwiftUI
 struct TimeZonePickerView: View {
   @ObservedObject var model: MeetingViewModel
   @State private var query = ""
-  @State private var hoveredSelectedTimeZoneID: String?
+  @State private var selectedInfoTimeZoneID: String?
 
   private let selectedColumns = Array(
-    repeating: GridItem(.flexible(), spacing: 6, alignment: .top),
+    repeating: GridItem(.flexible(), spacing: 10, alignment: .top),
     count: 3
   )
 
@@ -87,7 +87,7 @@ struct TimeZonePickerView: View {
   }
 
   private var selectedTimeZones: some View {
-    LazyVGrid(columns: selectedColumns, alignment: .leading, spacing: 7) {
+    LazyVGrid(columns: selectedColumns, alignment: .leading, spacing: 10) {
       ForEach(model.state.cities) { city in
         let relativeOffset = relativeOffset(for: city)
         VStack(alignment: .leading, spacing: 2) {
@@ -100,7 +100,7 @@ struct TimeZonePickerView: View {
               .lineLimit(1)
               .minimumScaleFactor(0.84)
           }
-          .padding(.trailing, 12)
+          .padding(.trailing, 28)
 
           Text(relativeOffset)
             .font(.system(size: 8, design: .rounded))
@@ -109,9 +109,10 @@ struct TimeZonePickerView: View {
             .minimumScaleFactor(0.68)
         }
         .overlay(alignment: .topTrailing) {
-          if model.state.cities.count == 1 {
+          HStack(spacing: 1) {
             Button {
-              hoveredSelectedTimeZoneID = city.id
+              selectedInfoTimeZoneID =
+                selectedInfoTimeZoneID == city.id ? nil : city.id
             } label: {
               Image(systemName: "info.circle")
                 .font(.system(size: 8, weight: .medium))
@@ -121,11 +122,17 @@ struct TimeZonePickerView: View {
             }
             .buttonStyle(.plain)
             .modifier(PointingHandCursorModifier())
-            .accessibilityLabel("Why is it not removable?")
-            .accessibilityHint("At least one time zone is required")
-          } else {
+            .accessibilityLabel("Show details for \(city.name)")
+
             Button {
-              model.removeTimeZone(id: city.id)
+              if model.state.cities.count == 1 {
+                selectedInfoTimeZoneID = city.id
+              } else {
+                if selectedInfoTimeZoneID == city.id {
+                  selectedInfoTimeZoneID = nil
+                }
+                model.removeTimeZone(id: city.id)
+              }
             } label: {
               Image(systemName: "xmark")
                 .font(.system(size: 7, weight: .bold))
@@ -134,7 +141,15 @@ struct TimeZonePickerView: View {
             }
             .buttonStyle(.plain)
             .modifier(PointingHandCursorModifier())
+            .opacity(model.state.cities.count == 1 ? 0.42 : 1)
+            .help(
+              model.state.cities.count == 1
+                ? "At least one time zone is required" : "Remove \(city.name)"
+            )
             .accessibilityLabel("Remove \(city.name)")
+            .accessibilityHint(
+              model.state.cities.count == 1 ? "At least one time zone is required" : ""
+            )
           }
         }
         .padding(.horizontal, 6)
@@ -145,24 +160,13 @@ struct TimeZonePickerView: View {
             .strokeBorder(Color.primary.opacity(0.045), lineWidth: 0.5)
         }
         .contentShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-        .onContinuousHover { phase in
-          switch phase {
-          case .active:
-            hoveredSelectedTimeZoneID = city.id
-          case .ended:
-            if hoveredSelectedTimeZoneID == city.id {
-              hoveredSelectedTimeZoneID = nil
-            }
-          }
-        }
-        .zIndex(hoveredSelectedTimeZoneID == city.id ? 20 : 0)
+        .zIndex(selectedInfoTimeZoneID == city.id ? 20 : 0)
       }
     }
     .overlay(alignment: .top) {
-      if let city = hoveredSelectedTimeZone {
+      if let city = selectedInfoTimeZone {
         selectedTimeZoneTooltip(for: city, relativeOffset: relativeOffset(for: city))
           .offset(y: selectedTimeZoneGridHeight + 6)
-          .allowsHitTesting(false)
           .transition(.opacity)
           .zIndex(30)
       }
@@ -170,13 +174,13 @@ struct TimeZonePickerView: View {
     .zIndex(20)
   }
 
-  private var hoveredSelectedTimeZone: City? {
-    guard let hoveredSelectedTimeZoneID else { return nil }
-    return model.state.cities.first { $0.id == hoveredSelectedTimeZoneID }
+  private var selectedInfoTimeZone: City? {
+    guard let selectedInfoTimeZoneID else { return nil }
+    return model.state.cities.first { $0.id == selectedInfoTimeZoneID }
   }
 
   private var selectedTimeZoneGridHeight: CGFloat {
-    model.state.cities.count > 3 ? 87 : 40
+    model.state.cities.count > 3 ? 90 : 40
   }
 
   private func relativeOffset(for city: City) -> String {
@@ -243,7 +247,7 @@ struct TimeZonePickerView: View {
 
   private var searchResults: some View {
     ScrollView {
-      LazyVStack(spacing: 2) {
+      LazyVStack(spacing: 5) {
         ForEach(availableResults.prefix(40)) { option in
           Button {
             model.addTimeZone(option)
