@@ -105,12 +105,19 @@ struct TimeZonePickerView: View {
         }
         .overlay(alignment: .topTrailing) {
           if model.state.cities.count == 1 {
-            Image(systemName: "info.circle")
-              .font(.system(size: 8, weight: .medium))
-              .foregroundStyle(.secondary)
-              .frame(width: 12, height: 12)
-              .contentShape(Rectangle())
-              .accessibilityLabel("At least one time zone is required")
+            Button {
+              hoveredSelectedTimeZoneID = city.id
+            } label: {
+              Image(systemName: "info.circle")
+                .font(.system(size: 8, weight: .medium))
+                .foregroundStyle(.secondary)
+                .frame(width: 12, height: 12)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .modifier(PointingHandCursorModifier())
+            .accessibilityLabel("Why is it not removable?")
+            .accessibilityHint("At least one time zone is required")
           } else {
             Button {
               model.removeTimeZone(id: city.id)
@@ -121,7 +128,8 @@ struct TimeZonePickerView: View {
                 .frame(width: 12, height: 12)
             }
             .buttonStyle(.plain)
-            .help("Remove \(city.name)")
+            .modifier(PointingHandCursorModifier())
+            .accessibilityLabel("Remove \(city.name)")
           }
         }
         .padding(.horizontal, 6)
@@ -199,13 +207,18 @@ struct TimeZonePickerView: View {
         .font(.system(size: 8.5, design: .monospaced))
         .foregroundStyle(Color.white.opacity(0.58))
 
-      Text(
-        model.state.cities.count == 1
-          ? "At least one time zone is required"
-          : "Your timezone: \(currentTimeZoneName)"
-      )
-      .font(.system(size: 8.5, design: .rounded))
-      .foregroundStyle(Color.white.opacity(0.64))
+      if model.state.cities.count == 1 {
+        Text("Why is it not removable?")
+          .font(.system(size: 8.5, weight: .semibold, design: .rounded))
+          .foregroundStyle(Color.white.opacity(0.76))
+        Text("Zonely requires at least one time zone.")
+          .font(.system(size: 8.5, design: .rounded))
+          .foregroundStyle(Color.white.opacity(0.64))
+      } else {
+        Text("Your timezone: \(currentTimeZoneName)")
+          .font(.system(size: 8.5, design: .rounded))
+          .foregroundStyle(Color.white.opacity(0.64))
+      }
     }
     .foregroundStyle(.white)
     .padding(.horizontal, 10)
@@ -276,6 +289,23 @@ struct TimeZonePickerView: View {
       }
     }
     .frame(maxHeight: .infinity)
+  }
+}
+
+private struct PointingHandCursorModifier: ViewModifier {
+  func body(content: Content) -> some View {
+    content
+      .onContinuousHover { phase in
+        switch phase {
+        case .active:
+          NSCursor.pointingHand.set()
+        case .ended:
+          NSCursor.arrow.set()
+        }
+      }
+      .onDisappear {
+        NSCursor.arrow.set()
+      }
   }
 }
 
