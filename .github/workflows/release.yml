@@ -1,0 +1,180 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Semantic version to publish, without the v prefix
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+
+concurrency:
+  group: release-${{ github.ref }}-${{ inputs.version }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Sign, notarize, and publish
+    runs-on: macos-26
+    timeout-minutes: 45
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Resolve release version
+        id: version
+        shell: bash
+        run: |
+          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            release_tag="${GITHUB_REF_NAME}"
+            release_version="${release_tag#v}"
+          else
+            release_version="${{ inputs.version }}"
+            release_tag="v${release_version}"
+          fi
+
+          if [[ ! "$release_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.-]+)?$ ]]; then
+            echo "Invalid semantic version: $release_version" >&2
+            exit 2
+          fi
+
+          echo "version=$release_version" >> "$GITHUB_OUTPUT"
+          echo "tag=$release_tag" >> "$GITHUB_OUTPUT"
+
+      - name: Check release secrets
+        env:
+          CERTIFICATE_BASE64: ${{ secrets.DEVELOPER_ID_CERTIFICATE_BASE64 }}
+          CERTIFICATE_PASSWORD: ${{ secrets.DEVELOPER_ID_CERTIFICATE_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+        run: |
+          for value in \
+            "$CERTIFICATE_BASE64" \
+            "$CERTIFICATE_PASSWORD" \
+            "$APPLE_ID" \
+            "$APPLE_TEAM_ID" \
+            "$APPLE_APP_SPECIFIC_PASSWORD"; do
+            if [[ -z "$value" ]]; then
+              echo "One or more required release secrets are missing." >&2
+              exit 2
+            fi
+          done
+
+      - name: Lint and test
+        run: |
+          bash -n script/*.sh
+          swift format lint --recursive --strict Sources Tests Package.swift
+          swift test --parallel
+
+      - name: Import Developer ID certificate
+        env:
+          CERTIFICATE_BASE64: ${{ secrets.DEVELOPER_ID_CERTIFICATE_BASE64 }}
+          CERTIFICATE_PASSWORD: ${{ secrets.DEVELOPER_ID_CERTIFICATE_PASSWORD }}
+        run: |
+          certificate_path="$RUNNER_TEMP/developer-id.p12"
+          keychain_path="$RUNNER_TEMP/zonely-signing.keychain-db"
+          keychain_password="$(openssl rand -hex 24)"
+
+          printf '%s' "$CERTIFICATE_BASE64" | base64 --decode > "$certificate_path"
+          security create-keychain -p "$keychain_password" "$keychain_path"
+          security set-keychain-settings -lut 21600 "$keychain_path"
+          security unlock-keychain -p "$keychain_password" "$keychain_path"
+          security import "$certificate_path" \
+            -k "$keychain_path" \
+            -P "$CERTIFICATE_PASSWORD" \
+            -A \
+            -T /usr/bin/codesign \
+            -T /usr/bin/security
+          security set-key-partition-list \
+            -S apple-tool:,apple:,codesign: \
+            -s \
+            -k "$keychain_password" \
+            "$keychain_path"
+          security list-keychains -d user -s "$keychain_path"
+
+          signing_identity="$(security find-identity -v -p codesigning "$keychain_path" | awk -F '"' '/Developer ID Application/ {print $2; exit}')"
+          if [[ -z "$signing_identity" ]]; then
+            echo "No Developer ID Application identity was imported." >&2
+            exit 1
+          fi
+
+          echo "SIGNING_IDENTITY=$signing_identity" >> "$GITHUB_ENV"
+          echo "SIGNING_KEYCHAIN=$keychain_path" >> "$GITHUB_ENV"
+
+      - name: Build signed and notarized distribution
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          BUILD_NUMBER: ${{ github.run_number }}
+          NOTARIZE: 1
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+        run: ./script/build_distribution.sh
+
+      - name: Verify Developer ID distribution
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          REQUIRE_NOTARIZATION: 1
+        run: ./script/verify_distribution.sh
+
+      - name: Attest DMG provenance
+        uses: actions/attest@v4
+        with:
+          subject-path: dist/Zonely-${{ steps.version.outputs.version }}-macos-universal.dmg
+
+      - name: Attest ZIP provenance
+        uses: actions/attest@v4
+        with:
+          subject-path: dist/Zonely-${{ steps.version.outputs.version }}-macos-universal.zip
+
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: Zonely-${{ steps.version.outputs.version }}-signed-notarized
+          path: |
+            dist/Zonely-${{ steps.version.outputs.version }}-macos-universal.dmg
+            dist/Zonely-${{ steps.version.outputs.version }}-macos-universal.dmg.sha256
+            dist/Zonely-${{ steps.version.outputs.version }}-macos-universal.zip
+            dist/Zonely-${{ steps.version.outputs.version }}-macos-universal.zip.sha256
+          if-no-files-found: error
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          assets=(
+            "dist/Zonely-$RELEASE_VERSION-macos-universal.dmg"
+            "dist/Zonely-$RELEASE_VERSION-macos-universal.dmg.sha256"
+            "dist/Zonely-$RELEASE_VERSION-macos-universal.zip"
+            "dist/Zonely-$RELEASE_VERSION-macos-universal.zip.sha256"
+          )
+
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release upload "$RELEASE_TAG" "${assets[@]}" --clobber
+          else
+            gh release create "$RELEASE_TAG" "${assets[@]}" \
+              --target "$GITHUB_SHA" \
+              --title "Zonely $RELEASE_TAG" \
+              --generate-notes
+          fi
+
+      - name: Remove temporary keychain
+        if: always()
+        run: |
+          if [[ -n "${SIGNING_KEYCHAIN:-}" ]]; then
+            security delete-keychain "$SIGNING_KEYCHAIN" || true
+          fi

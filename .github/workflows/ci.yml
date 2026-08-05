@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Lint and test
+    runs-on: macos-26
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Show toolchain
+        run: |
+          swift --version
+          xcodebuild -version
+
+      - name: Lint shell scripts
+        run: bash -n script/*.sh
+
+      - name: Lint Swift formatting
+        run: swift format lint --recursive --strict Sources Tests Package.swift
+
+      - name: Run tests
+        run: swift test --parallel
+
+  distribution:
+    name: Build universal distribution
+    needs: quality
+    runs-on: macos-26
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Build unsigned CI artifacts
+        env:
+          VERSION: 0.0.0-ci
+          BUILD_NUMBER: ${{ github.run_number }}
+        run: ./script/build_distribution.sh
+
+      - name: Verify app and DMG
+        env:
+          VERSION: 0.0.0-ci
+        run: ./script/verify_distribution.sh
+
+      - name: Upload distribution artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: Zonely-macOS-universal-unsigned
+          path: |
+            dist/Zonely-0.0.0-ci-macos-universal.dmg
+            dist/Zonely-0.0.0-ci-macos-universal.dmg.sha256
+            dist/Zonely-0.0.0-ci-macos-universal.zip
+            dist/Zonely-0.0.0-ci-macos-universal.zip.sha256
+          if-no-files-found: error
+          retention-days: 7
