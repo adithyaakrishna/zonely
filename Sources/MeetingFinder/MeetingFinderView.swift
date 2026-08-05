@@ -37,6 +37,9 @@ struct MeetingFinderView: View {
     .onReceive(NotificationCenter.default.publisher(for: .showTimeZonePicker)) { _ in
       isShowingTimeZonePicker = true
     }
+    .onReceive(NotificationCenter.default.publisher(for: .hideTimeZonePicker)) { _ in
+      isShowingTimeZonePicker = false
+    }
   }
 
   private var header: some View {
@@ -221,6 +224,7 @@ struct MeetingFinderView: View {
 
 extension Notification.Name {
   static let showTimeZonePicker = Notification.Name("Zonely.showTimeZonePicker")
+  static let hideTimeZonePicker = Notification.Name("Zonely.hideTimeZonePicker")
 }
 
 private struct TimelineGrid: View {
