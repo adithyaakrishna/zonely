@@ -1,46 +1,65 @@
 import AppKit
 
 enum ZonelyMenuBarIcon {
+  private static let activeCells: [[Bool]] = [
+    [false, false, false, false, true, true, true, true, true, true],
+    [false, false, true, true, true, true, true, true, false, false],
+    [false, false, false, false, true, true, true, false, false, false],
+    [false, false, false, true, true, true, true, true, true, false],
+    [false, true, true, true, true, true, false, false, false, false],
+  ]
+
   static func makeImage() -> NSImage {
-    let image = NSImage(size: NSSize(width: 16, height: 18), flipped: false) { _ in
+    let iconSize = NSSize(width: 18, height: 18)
+    let image = NSImage(size: iconSize, flipped: false) { _ in
       NSGraphicsContext.saveGraphicsState()
       defer { NSGraphicsContext.restoreGraphicsState() }
 
-      NSColor.black.setStroke()
-      NSColor.black.setFill()
-
-      let globeConfiguration = NSImage.SymbolConfiguration(pointSize: 10, weight: .regular)
-      if let globe = NSImage(
-        systemSymbolName: "globe",
-        accessibilityDescription: "Zonely"
-      )?.withSymbolConfiguration(globeConfiguration) {
-        globe.draw(
-          in: NSRect(x: 0.8, y: 4, width: 10, height: 10),
-          from: .zero,
-          operation: .sourceOver,
-          fraction: 1
-        )
-      }
-
-      let selectorRail = NSBezierPath(
-        roundedRect: NSRect(x: 9.4, y: 2, width: 3.8, height: 14),
-        xRadius: 1.9,
-        yRadius: 1.9
-      )
-      selectorRail.lineWidth = 1.1
-      selectorRail.stroke()
-
-      let sliderThumb = NSBezierPath(
-        roundedRect: NSRect(x: 7, y: 7.3, width: 8.8, height: 3.4),
-        xRadius: 1.7,
-        yRadius: 1.7
-      )
-      sliderThumb.fill()
-
+      drawAvailabilityGrid()
+      drawSelector()
       return true
     }
     image.isTemplate = true
     image.accessibilityDescription = "Zonely"
     return image
+  }
+
+  private static func drawAvailabilityGrid() {
+    let cellSize = NSSize(width: 1.2, height: 1.8)
+    let columnGap: CGFloat = 0.38
+    let rowGap: CGFloat = 0.65
+    let gridWidth = (CGFloat(activeCells[0].count) * cellSize.width) + (9 * columnGap)
+    let gridHeight = (CGFloat(activeCells.count) * cellSize.height) + (4 * rowGap)
+    let origin = NSPoint(x: (18 - gridWidth) / 2, y: (18 - gridHeight) / 2)
+
+    for (rowIndex, row) in activeCells.enumerated() {
+      for (columnIndex, isActive) in row.enumerated() {
+        let x = origin.x + (CGFloat(columnIndex) * (cellSize.width + columnGap))
+        let y =
+          origin.y
+          + (CGFloat(activeCells.count - rowIndex - 1) * (cellSize.height + rowGap))
+        let cell = NSBezierPath(
+          roundedRect: NSRect(origin: NSPoint(x: x, y: y), size: cellSize),
+          xRadius: 0.42,
+          yRadius: 0.42
+        )
+        NSColor.black.withAlphaComponent(isActive ? 0.92 : 0.20).setFill()
+        cell.fill()
+      }
+    }
+  }
+
+  private static func drawSelector() {
+    let selector = NSBezierPath(
+      roundedRect: NSRect(x: 7.15, y: 0.9, width: 3.7, height: 16.2),
+      xRadius: 1.85,
+      yRadius: 1.85
+    )
+
+    NSColor.black.withAlphaComponent(0.10).setFill()
+    selector.fill()
+    NSColor.black.withAlphaComponent(0.96).setStroke()
+    selector.lineWidth = 0.85
+    selector.stroke()
   }
 }

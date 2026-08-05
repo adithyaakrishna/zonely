@@ -4,6 +4,15 @@ import Testing
 @testable import MeetingFinder
 
 struct MeetingStateTests {
+  @MainActor
+  @Test func menuBarIconUsesTheAppIconMotifAsATemplate() {
+    let icon = ZonelyMenuBarIcon.makeImage()
+
+    #expect(icon.size == CGSize(width: 18, height: 18))
+    #expect(icon.isTemplate)
+    #expect(icon.accessibilityDescription == "Zonely")
+  }
+
   @Test func timeZoneInfoDismissesOnlyOutsideInfoButtons() {
     let frames = ["London": CGRect(x: 40, y: 20, width: 12, height: 12)]
 
