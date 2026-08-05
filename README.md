@@ -17,7 +17,7 @@ Zonely turns the working day in each city into one compact timeline. Move the gl
 ## Features
 
 - Lives entirely in the macOS menu bar.
-- Shows working, edge, and off-hours across up to five time zones.
+- Shows working, edge, and off-hours across up to six time zones.
 - Supports fractional UTC offsets such as India Standard Time.
 - Searches by city, IANA identifier, IATA airport code, or common time-zone abbreviation.
 - Resolves offsets from current IANA rules, including daylight-saving transitions.
@@ -41,7 +41,7 @@ Release downloads are universal binaries for Apple silicon and Intel Macs. SHA-2
 - Click the menu-bar icon to open or close Zonely.
 - Drag horizontally across the timeline to change the selected UTC hour.
 - Drag the six-dot handle beside a city to reorder it.
-- Select **+** to add, remove, or search time zones. Zonely supports one to five locations.
+- Select **+** to add, remove, or search time zones. Zonely supports one to six locations.
 - Select **Find best time** to jump to the strongest working-hours overlap.
 - Right-click the menu-bar icon to reset the selected time or quit.
 

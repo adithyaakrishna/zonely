@@ -1,6 +1,24 @@
 import AppKit
 import SwiftUI
 
+enum TimelineMetrics {
+  static let availableHeight: CGFloat = 182
+  static let labelHeight: CGFloat = 24
+  static let rowGap: CGFloat = 4
+
+  static func rowHeight(for cityCount: Int) -> CGFloat {
+    switch cityCount {
+    case 6...: 26
+    case 5: 29
+    default: 34
+    }
+  }
+
+  static func cellHeight(for cityCount: Int) -> CGFloat {
+    rowHeight(for: cityCount) - rowGap
+  }
+}
+
 struct MeetingFinderView: View {
   @ObservedObject var model: MeetingViewModel
   @State private var isShowingTimeZonePicker: Bool
@@ -84,10 +102,10 @@ struct MeetingFinderView: View {
         .frame(width: 124, alignment: .leading)
 
       TimelineGrid(model: model, reorderSession: reorderSession)
-        .frame(width: 300, height: 182)
+        .frame(width: 300, height: TimelineMetrics.availableHeight)
 
       selectedTimeLabels
-        .frame(width: 64, height: 182, alignment: .topLeading)
+        .frame(width: 64, height: TimelineMetrics.availableHeight, alignment: .topLeading)
     }
     .padding(.horizontal, 14)
     .padding(.vertical, 14)
@@ -151,7 +169,7 @@ struct MeetingFinderView: View {
   }
 
   private var cityRowHeight: CGFloat {
-    model.state.cities.count >= MeetingState.maximumCityCount ? 29 : 34
+    TimelineMetrics.rowHeight(for: model.state.cities.count)
   }
 
   private var reorderDestinationIndex: Int? {
@@ -233,9 +251,9 @@ private struct TimelineGrid: View {
   @State private var dragPositionX: CGFloat?
   @State private var isPointerInsideGrid = false
 
-  private let labelHeight: CGFloat = 24
+  private let labelHeight = TimelineMetrics.labelHeight
   private let cellGap: CGFloat = 2.5
-  private let rowGap: CGFloat = 4
+  private let rowGap = TimelineMetrics.rowGap
   private let gridWidth: CGFloat = 300
 
   private var cellWidth: CGFloat {
@@ -243,11 +261,11 @@ private struct TimelineGrid: View {
   }
 
   private var cellHeight: CGFloat {
-    model.state.cities.count >= MeetingState.maximumCityCount ? 25 : 30
+    TimelineMetrics.cellHeight(for: model.state.cities.count)
   }
 
   private var rowHeight: CGFloat {
-    cellHeight + rowGap
+    TimelineMetrics.rowHeight(for: model.state.cities.count)
   }
 
   var body: some View {
@@ -319,7 +337,7 @@ private struct TimelineGrid: View {
         .frame(width: 18, height: 4.5)
         .shadow(color: handleColor.opacity(0.22), radius: 2, y: 1)
     }
-    .frame(width: cellWidth + 7, height: 182, alignment: .top)
+    .frame(width: cellWidth + 7, height: TimelineMetrics.availableHeight, alignment: .top)
     .accessibilityElement(children: .ignore)
     .accessibilityLabel("Selected UTC time")
     .accessibilityValue(String(format: "%02d:00", model.state.selectedUTCHour))

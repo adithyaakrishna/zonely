@@ -98,7 +98,7 @@ struct MeetingStateTests {
     #expect(TimeZoneCatalog.search("CEST").contains { $0.id == "Europe/Paris" })
   }
 
-  @Test func timeZoneListAllowsNoMoreThanFiveUniqueCities() {
+  @Test func timeZoneListAllowsNoMoreThanSixUniqueCities() {
     var state = MeetingState()
     let kolkata = TimeZoneOption(
       id: "Asia/Kolkata",
@@ -112,15 +112,34 @@ struct MeetingStateTests {
       detail: "Japan Standard Time",
       utcOffsetMinutes: 540
     )
+    let dubai = TimeZoneOption(
+      id: "Asia/Dubai",
+      cityName: "Dubai",
+      detail: "Gulf Standard Time",
+      utcOffsetMinutes: 240
+    )
 
     let addedKolkata = state.addTimeZone(kolkata)
     #expect(addedKolkata)
     #expect(state.cities.count == 5)
     let addedDuplicate = state.addTimeZone(kolkata)
-    let addedSixth = state.addTimeZone(tokyo)
+    let addedTokyo = state.addTimeZone(tokyo)
+    let addedSeventh = state.addTimeZone(dubai)
     #expect(!addedDuplicate)
-    #expect(!addedSixth)
+    #expect(addedTokyo)
+    #expect(!addedSeventh)
     #expect(state.cities.count == MeetingState.maximumCityCount)
+  }
+
+  @Test func sixTimeZonesFitWithinTheTimeline() {
+    let rowsHeight =
+      TimelineMetrics.labelHeight
+      + (CGFloat(MeetingState.maximumCityCount)
+        * TimelineMetrics.rowHeight(for: MeetingState.maximumCityCount))
+
+    #expect(rowsHeight <= TimelineMetrics.availableHeight)
+    #expect(TimelineMetrics.rowHeight(for: 5) == 29)
+    #expect(TimelineMetrics.rowHeight(for: 6) == 26)
   }
 
   @Test func atLeastOneTimeZoneMustRemain() {

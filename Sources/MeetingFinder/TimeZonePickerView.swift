@@ -71,13 +71,18 @@ struct TimeZonePickerView: View {
     }
     .padding(16)
     .frame(width: 310, height: 390)
+    .background(
+      Color.white.opacity(0.995),
+      in: RoundedRectangle(cornerRadius: 18, style: .continuous)
+    )
     .background(PopoverWindowStyler())
     .overlay {
       RoundedRectangle(cornerRadius: 18, style: .continuous)
-        .strokeBorder(Color.black.opacity(0.025), lineWidth: 0.5)
+        .strokeBorder(Color.black.opacity(0.06), lineWidth: 0.5)
     }
-    .shadow(color: Color.black.opacity(0.11), radius: 12, x: 0, y: 6)
-    .presentationBackground(Color.white.opacity(0.985))
+    .shadow(color: Color.black.opacity(0.055), radius: 2, x: 0, y: 1)
+    .shadow(color: Color.black.opacity(0.13), radius: 16, x: 0, y: 8)
+    .presentationBackground(Color.white.opacity(0.995))
     .presentationCornerRadius(18)
   }
 

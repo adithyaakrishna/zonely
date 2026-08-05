@@ -111,6 +111,7 @@ struct City: Identifiable, Equatable, Sendable {
     Color(red: 0.94, green: 0.00, blue: 0.31),
     Color(red: 0.96, green: 0.51, blue: 0.00),
     Color(red: 0.00, green: 0.62, blue: 0.58),
+    Color(red: 0.42, green: 0.67, blue: 0.08),
   ]
 }
 
@@ -145,7 +146,7 @@ struct LocalTime: Equatable, Sendable {
 
 struct MeetingState: Equatable, Sendable {
   static let bestUTCHour = 16
-  static let maximumCityCount = 5
+  static let maximumCityCount = 6
 
   static let defaultCities: [City] = [
     City(
