@@ -47,7 +47,9 @@ struct MeetingStateTests {
       colorIndex: 4
     )
     #expect(kolkata.offsetLabel == "UTC+5:30")
-    #expect(kolkata.relativeOffsetLabel(atUTC: 20) == "5h 30m ahead of UTC")
+    #expect(
+      kolkata.relativeOffsetLabel(atUTC: 20, comparedTo: Self.utc)
+        == "5h 30m ahead of you")
     #expect(kolkata.localTime(at: 20) == LocalTime(hour: 1, minute: 30, dayOffset: 1))
   }
 
@@ -60,11 +62,23 @@ struct MeetingStateTests {
     )
     let winter = try #require(ISO8601DateFormatter().date(from: "2026-01-15T00:00:00Z"))
     let summer = try #require(ISO8601DateFormatter().date(from: "2026-07-15T00:00:00Z"))
+    let kolkataTimeZone = try #require(TimeZone(identifier: "Asia/Kolkata"))
+    let newYorkTimeZone = try #require(TimeZone(identifier: "America/New_York"))
 
     #expect(newYork.utcOffsetMinutes(at: winter) == -300)
     #expect(newYork.utcOffsetMinutes(at: summer) == -240)
-    #expect(newYork.relativeOffsetLabel(atUTC: 12, on: winter) == "5h behind UTC")
-    #expect(newYork.relativeOffsetLabel(atUTC: 12, on: summer) == "4h behind UTC")
+    #expect(
+      newYork.relativeOffsetLabel(atUTC: 12, on: winter, comparedTo: Self.utc)
+        == "5h behind you")
+    #expect(
+      newYork.relativeOffsetLabel(atUTC: 12, on: summer, comparedTo: Self.utc)
+        == "4h behind you")
+    #expect(
+      newYork.relativeOffsetLabel(atUTC: 12, on: summer, comparedTo: kolkataTimeZone)
+        == "9h 30m behind you")
+    #expect(
+      newYork.relativeOffsetLabel(atUTC: 12, on: summer, comparedTo: newYorkTimeZone)
+        == "Same time as you")
     #expect(newYork.localTime(at: 12, on: winter) == LocalTime(hour: 7, dayOffset: 0))
     #expect(newYork.localTime(at: 12, on: summer) == LocalTime(hour: 8, dayOffset: 0))
   }
@@ -150,4 +164,5 @@ struct MeetingStateTests {
   }
 
   private static let summer = ISO8601DateFormatter().date(from: "2026-07-15T00:00:00Z")!
+  private static let utc = TimeZone(secondsFromGMT: 0)!
 }

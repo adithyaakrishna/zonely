@@ -6,7 +6,7 @@ struct TimeZonePickerView: View {
   @State private var query = ""
 
   private let selectedColumns = Array(
-    repeating: GridItem(.flexible(), spacing: 7, alignment: .top),
+    repeating: GridItem(.flexible(), spacing: 6, alignment: .top),
     count: 3
   )
 
@@ -71,7 +71,12 @@ struct TimeZonePickerView: View {
     .padding(16)
     .frame(width: 310, height: 390)
     .background(PopoverWindowStyler())
-    .presentationBackground(Color.white.opacity(0.97))
+    .overlay {
+      RoundedRectangle(cornerRadius: 18, style: .continuous)
+        .strokeBorder(Color.black.opacity(0.025), lineWidth: 0.5)
+    }
+    .shadow(color: Color.black.opacity(0.11), radius: 12, x: 0, y: 6)
+    .presentationBackground(Color.white.opacity(0.985))
     .presentationCornerRadius(18)
   }
 
@@ -80,50 +85,50 @@ struct TimeZonePickerView: View {
       ForEach(model.state.cities) { city in
         let relativeOffset = city.relativeOffsetLabel(
           atUTC: model.state.selectedUTCHour,
-          on: model.state.referenceDate
+          on: model.state.referenceDate,
+          comparedTo: .autoupdatingCurrent
         )
-        VStack(alignment: .leading, spacing: 3) {
+        VStack(alignment: .leading, spacing: 2) {
           HStack(spacing: 4) {
             Circle()
               .fill(city.color)
-              .frame(width: 6, height: 6)
+              .frame(width: 5.5, height: 5.5)
             Text(city.name)
-              .font(.system(size: 9.5, weight: .semibold, design: .rounded))
+              .font(.system(size: 9, weight: .semibold, design: .rounded))
               .lineLimit(1)
               .minimumScaleFactor(0.84)
           }
+          .padding(.trailing, 12)
 
-          HStack(spacing: 2) {
-            Text(relativeOffset)
-              .font(.system(size: 8.5, design: .rounded))
+          Text(relativeOffset)
+            .font(.system(size: 8, design: .rounded))
+            .foregroundStyle(.secondary)
+            .lineLimit(1)
+            .minimumScaleFactor(0.68)
+        }
+        .overlay(alignment: .topTrailing) {
+          Button {
+            model.removeTimeZone(id: city.id)
+          } label: {
+            Image(systemName: "xmark")
+              .font(.system(size: 7, weight: .bold))
               .foregroundStyle(.secondary)
-              .lineLimit(1)
-              .minimumScaleFactor(0.72)
-            Spacer(minLength: 0)
-
-            Button {
-              model.removeTimeZone(id: city.id)
-            } label: {
-              Image(systemName: "xmark")
-                .font(.system(size: 7.5, weight: .bold))
-                .foregroundStyle(.secondary)
-                .frame(width: 14, height: 14)
-            }
-            .buttonStyle(.plain)
-            .disabled(model.state.cities.count == 1)
-            .help(
-              model.state.cities.count == 1
-                ? "At least one time zone is required" : "Remove \(city.name)")
+              .frame(width: 12, height: 12)
           }
+          .buttonStyle(.plain)
+          .disabled(model.state.cities.count == 1)
+          .help(
+            model.state.cities.count == 1
+              ? "At least one time zone is required" : "Remove \(city.name)")
         }
-        .padding(.horizontal, 7)
-        .frame(height: 47)
-        .background(Color.primary.opacity(0.045), in: RoundedRectangle(cornerRadius: 9))
+        .padding(.horizontal, 6)
+        .frame(height: 40)
+        .background(Color.primary.opacity(0.04), in: RoundedRectangle(cornerRadius: 8))
         .overlay {
-          RoundedRectangle(cornerRadius: 9)
-            .strokeBorder(Color.primary.opacity(0.055), lineWidth: 0.5)
+          RoundedRectangle(cornerRadius: 8)
+            .strokeBorder(Color.primary.opacity(0.045), lineWidth: 0.5)
         }
-        .contentShape(RoundedRectangle(cornerRadius: 9, style: .continuous))
+        .contentShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
         .help(selectedTimeZoneTooltip(for: city, relativeOffset: relativeOffset))
       }
     }
@@ -132,7 +137,15 @@ struct TimeZonePickerView: View {
   private func selectedTimeZoneTooltip(for city: City, relativeOffset: String) -> String {
     let fullTimeZoneName =
       TimeZone(identifier: city.id)?.localizedName(for: .generic, locale: .current) ?? city.id
-    return "\(city.name)\n\(fullTimeZoneName)\n\(city.id)\n\(relativeOffset)"
+    let currentTimeZone = TimeZone.autoupdatingCurrent
+    let currentTimeZoneName =
+      currentTimeZone.localizedName(for: .generic, locale: .current) ?? currentTimeZone.identifier
+    return """
+      \(city.name)
+      \(fullTimeZoneName)
+      \(city.id)
+      \(relativeOffset) · Your timezone: \(currentTimeZoneName)
+      """
   }
 
   private var searchResults: some View {
@@ -204,7 +217,7 @@ private final class PopoverStylingView: NSView {
     super.viewDidMoveToWindow()
     DispatchQueue.main.async { [weak self] in
       guard let window = self?.window else { return }
-      window.hasShadow = true
+      window.hasShadow = false
       window.invalidateShadow()
     }
   }
