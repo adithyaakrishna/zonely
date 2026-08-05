@@ -5,10 +5,10 @@ import Testing
 
 struct MeetingStateTests {
   @MainActor
-  @Test func menuBarIconUsesTheFullColorApplicationArtwork() {
+  @Test func menuBarIconUsesTheCroppedFullColorArtwork() {
     let icon = ZonelyMenuBarIcon.makeImage()
 
-    #expect(icon.size == CGSize(width: 18, height: 18))
+    #expect(icon.size == CGSize(width: 20, height: 18))
     #expect(!icon.isTemplate)
     #expect(icon.accessibilityDescription == "Zonely")
   }

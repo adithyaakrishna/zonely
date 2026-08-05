@@ -44,6 +44,7 @@ rm -rf "$APP_BUNDLE"
 mkdir -p "$APP_MACOS" "$APP_RESOURCES"
 cp "$BUILD_BINARY" "$APP_BINARY"
 cp "$ROOT_DIR/Assets/Zonely.icns" "$APP_RESOURCES/Zonely.icns"
+cp "$ROOT_DIR/Assets/ZonelyMenuBar.svg" "$APP_RESOURCES/ZonelyMenuBar.svg"
 chmod +x "$APP_BINARY"
 
 cat >"$INFO_PLIST" <<PLIST
