@@ -1,4 +1,5 @@
 import AppKit
+import Combine
 import SwiftUI
 
 @MainActor
@@ -6,15 +7,18 @@ final class MenuBarController: NSObject {
   private let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
   private let panel: FinderPanel
   private let model = MeetingViewModel()
+  private var stateObservation: AnyCancellable?
   private var outsideClickMonitor: Any?
   private var shouldShowTimeZonePickerOnNextPresentation = CommandLine.arguments.contains(
     "--show-time-zone-picker")
 
   override init() {
+    let panelSize = MeetingFinderLayout.panelSize(for: model.state.cities.count)
     let rootView = MeetingFinderView(model: model)
-      .padding(16)
+      .padding(MeetingFinderLayout.panelPadding)
     let hostingView = NSHostingView(rootView: rootView)
-    hostingView.frame = NSRect(x: 0, y: 0, width: 572, height: 346)
+    hostingView.frame = NSRect(origin: .zero, size: panelSize)
+    hostingView.autoresizingMask = [.width, .height]
 
     panel = FinderPanel(
       contentRect: hostingView.frame,
@@ -28,6 +32,7 @@ final class MenuBarController: NSObject {
 
     configureStatusItem()
     configurePanel()
+    observePanelSize()
   }
 
   func showPanel() {
@@ -112,6 +117,27 @@ final class MenuBarController: NSObject {
     panel.collectionBehavior = [.transient, .moveToActiveSpace, .fullScreenAuxiliary]
     panel.hidesOnDeactivate = false
     panel.isReleasedWhenClosed = false
+  }
+
+  private func observePanelSize() {
+    stateObservation = model.$state
+      .map { $0.cities.count }
+      .removeDuplicates()
+      .dropFirst()
+      .sink { [weak self] cityCount in
+        self?.resizePanel(for: cityCount)
+      }
+  }
+
+  private func resizePanel(for cityCount: Int) {
+    let size = MeetingFinderLayout.panelSize(for: cityCount)
+    guard panel.frame.size != size else { return }
+
+    let resizedFrame = MeetingFinderLayout.panelFrame(
+      preservingTopOf: panel.frame,
+      for: cityCount
+    )
+    panel.setFrame(resizedFrame, display: true, animate: panel.isVisible)
   }
 
   @objc private func statusItemPressed(_ sender: NSStatusBarButton) {

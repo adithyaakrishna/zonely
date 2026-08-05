@@ -2,22 +2,59 @@ import AppKit
 import SwiftUI
 
 enum TimelineMetrics {
-  static let availableHeight: CGFloat = 182
   static let labelHeight: CGFloat = 24
+  static let rowHeight: CGFloat = 34
   static let rowGap: CGFloat = 6
   static let hourGap: CGFloat = 3.5
   static let timeLabelGap: CGFloat = 10
+  static let cardVerticalPadding: CGFloat = 28
 
-  static func rowHeight(for cityCount: Int) -> CGFloat {
-    switch cityCount {
-    case 6...: 26
-    case 5: 29
-    default: 34
-    }
+  static func rowHeight(for _: Int) -> CGFloat {
+    rowHeight
   }
 
   static func cellHeight(for cityCount: Int) -> CGFloat {
     rowHeight(for: cityCount) - rowGap
+  }
+
+  static func availableHeight(for cityCount: Int) -> CGFloat {
+    labelHeight + (CGFloat(cityCount) * rowHeight(for: cityCount))
+  }
+
+  static func cardHeight(for cityCount: Int) -> CGFloat {
+    availableHeight(for: cityCount) + cardVerticalPadding
+  }
+}
+
+enum MeetingFinderLayout {
+  static let cardWidth: CGFloat = 540
+  static let headerHeight: CGFloat = 52
+  static let footerHeight: CGFloat = 52
+  static let panelPadding: CGFloat = 16
+
+  static func cardSize(for cityCount: Int) -> CGSize {
+    CGSize(
+      width: cardWidth,
+      height: headerHeight + TimelineMetrics.cardHeight(for: cityCount) + footerHeight
+    )
+  }
+
+  static func panelSize(for cityCount: Int) -> CGSize {
+    let cardSize = cardSize(for: cityCount)
+    return CGSize(
+      width: cardSize.width + (panelPadding * 2),
+      height: cardSize.height + (panelPadding * 2)
+    )
+  }
+
+  static func panelFrame(preservingTopOf currentFrame: CGRect, for cityCount: Int) -> CGRect {
+    let size = panelSize(for: cityCount)
+    return CGRect(
+      x: currentFrame.minX,
+      y: currentFrame.maxY - size.height,
+      width: size.width,
+      height: size.height
+    )
   }
 }
 
@@ -26,23 +63,24 @@ struct MeetingFinderView: View {
   @State private var isShowingTimeZonePicker: Bool
   @State private var reorderSession: TimeZoneReorderSession?
 
-  private let cardSize = CGSize(width: 540, height: 314)
-
   init(model: MeetingViewModel) {
     self.model = model
     _isShowingTimeZonePicker = State(initialValue: false)
   }
 
   var body: some View {
+    let cityCount = model.state.cities.count
+    let cardSize = MeetingFinderLayout.cardSize(for: cityCount)
+
     VStack(spacing: 0) {
       header
-        .frame(height: 52)
+        .frame(height: MeetingFinderLayout.headerHeight)
 
       timelineCard
         .padding(.horizontal, 12)
 
       footer
-        .frame(maxHeight: .infinity)
+        .frame(height: MeetingFinderLayout.footerHeight)
     }
     .frame(width: cardSize.width, height: cardSize.height)
     .background(Color(red: 0.935, green: 0.935, blue: 0.94))
@@ -53,6 +91,7 @@ struct MeetingFinderView: View {
     }
     .shadow(color: Color.black.opacity(0.035), radius: 2, x: 0, y: 1)
     .shadow(color: Color.black.opacity(0.085), radius: 16, x: 0, y: 8)
+    .animation(.easeInOut(duration: 0.2), value: cityCount)
     .environment(\.colorScheme, .light)
     .onReceive(NotificationCenter.default.publisher(for: .showTimeZonePicker)) { _ in
       isShowingTimeZonePicker = true
@@ -99,20 +138,22 @@ struct MeetingFinderView: View {
   }
 
   private var timelineCard: some View {
-    HStack(alignment: .top, spacing: 0) {
+    let availableHeight = TimelineMetrics.availableHeight(for: model.state.cities.count)
+
+    return HStack(alignment: .top, spacing: 0) {
       cityLabels
         .frame(width: 124, alignment: .leading)
 
       TimelineGrid(model: model, reorderSession: reorderSession)
-        .frame(width: 300, height: TimelineMetrics.availableHeight)
+        .frame(width: 300, height: availableHeight)
         .padding(.trailing, TimelineMetrics.timeLabelGap)
 
       selectedTimeLabels
-        .frame(width: 64, height: TimelineMetrics.availableHeight, alignment: .topLeading)
+        .frame(width: 64, height: availableHeight, alignment: .topLeading)
     }
     .padding(.horizontal, 9)
     .padding(.vertical, 14)
-    .frame(height: 210)
+    .frame(height: TimelineMetrics.cardHeight(for: model.state.cities.count))
     .background(Color.white.opacity(0.96))
     .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
   }
@@ -340,7 +381,11 @@ private struct TimelineGrid: View {
         .frame(width: 18, height: 4.5)
         .shadow(color: handleColor.opacity(0.22), radius: 2, y: 1)
     }
-    .frame(width: cellWidth + 7, height: TimelineMetrics.availableHeight, alignment: .top)
+    .frame(
+      width: cellWidth + 7,
+      height: TimelineMetrics.availableHeight(for: model.state.cities.count),
+      alignment: .top
+    )
     .accessibilityElement(children: .ignore)
     .accessibilityLabel("Selected UTC time")
     .accessibilityValue(String(format: "%02d:00", model.state.selectedUTCHour))

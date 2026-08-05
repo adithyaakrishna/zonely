@@ -151,17 +151,20 @@ struct MeetingStateTests {
     #expect(state.cities.count == MeetingState.maximumCityCount)
   }
 
-  @Test func sixTimeZonesFitWithinTheTimeline() {
-    let rowsHeight =
-      TimelineMetrics.labelHeight
-      + (CGFloat(MeetingState.maximumCityCount)
-        * TimelineMetrics.rowHeight(for: MeetingState.maximumCityCount))
+  @Test func mainPickerHeightTracksTheTimeZoneCount() {
+    let oneZoneHeight = MeetingFinderLayout.panelSize(for: 1).height
+    let sixZoneHeight = MeetingFinderLayout.panelSize(for: 6).height
 
-    #expect(rowsHeight <= TimelineMetrics.availableHeight)
-    #expect(TimelineMetrics.rowHeight(for: 5) == 29)
-    #expect(TimelineMetrics.rowHeight(for: 6) == 26)
-    #expect(TimelineMetrics.cellHeight(for: 6) == 20)
+    #expect(TimelineMetrics.availableHeight(for: 1) == 58)
+    #expect(TimelineMetrics.availableHeight(for: 6) == 228)
+    #expect(sixZoneHeight - oneZoneHeight == 5 * TimelineMetrics.rowHeight)
+    #expect(TimelineMetrics.cellHeight(for: 6) == 28)
     #expect(TimelineMetrics.timeLabelGap == 10)
+
+    let currentFrame = CGRect(x: 40, y: 200, width: 572, height: sixZoneHeight)
+    let resizedFrame = MeetingFinderLayout.panelFrame(preservingTopOf: currentFrame, for: 1)
+    #expect(resizedFrame.maxY == currentFrame.maxY)
+    #expect(resizedFrame.height == oneZoneHeight)
   }
 
   @Test func atLeastOneTimeZoneMustRemain() {
