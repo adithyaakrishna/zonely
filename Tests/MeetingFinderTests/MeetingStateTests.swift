@@ -1,3 +1,4 @@
+import Foundation
 import Testing
 
 @testable import MeetingFinder
@@ -5,28 +6,37 @@ import Testing
 struct MeetingStateTests {
   @Test func timeZoneConversionWrapsAcrossDays() {
     let sanFrancisco = MeetingState.defaultCities[0]
-    #expect(sanFrancisco.localTime(at: 5) == LocalTime(hour: 22, dayOffset: -1))
+    #expect(
+      sanFrancisco.localTime(at: 5, on: Self.summer)
+        == LocalTime(hour: 22, dayOffset: -1))
 
     let london = MeetingState.defaultCities[3]
-    #expect(london.localTime(at: 23) == LocalTime(hour: 0, dayOffset: 1))
+    #expect(london.localTime(at: 23, on: Self.summer) == LocalTime(hour: 0, dayOffset: 1))
   }
 
   @Test func initialTimeIsOutsideWorkingHoursEverywhere() {
-    let state = MeetingState(selectedUTCHour: 5)
+    let state = MeetingState(selectedUTCHour: 5, referenceDate: Self.summer)
     #expect(state.workingCount == 0)
     #expect(state.summary == "Off hours everywhere")
   }
 
   @Test func bestTimeWorksForEveryCity() {
-    let state = MeetingState(selectedUTCHour: MeetingState.bestUTCHour)
+    let state = MeetingState(
+      selectedUTCHour: MeetingState.bestUTCHour,
+      referenceDate: Self.summer
+    )
     #expect(state.workingCount == 4)
     #expect(state.worksForEveryone)
     #expect(state.summary == "Works for everyone")
   }
 
   @Test func summaryNamesTheOnlyExcludedCity() {
-    #expect(MeetingState(selectedUTCHour: 15).summary == "3 of 4, early in San Francisco")
-    #expect(MeetingState(selectedUTCHour: 20).summary == "3 of 4, late in London")
+    #expect(
+      MeetingState(selectedUTCHour: 15, referenceDate: Self.summer).summary
+        == "3 of 4, early in San Francisco")
+    #expect(
+      MeetingState(selectedUTCHour: 20, referenceDate: Self.summer).summary
+        == "3 of 4, late in London")
   }
 
   @Test func fractionalOffsetsDisplayAndConvertCorrectly() {
@@ -38,6 +48,37 @@ struct MeetingStateTests {
     )
     #expect(kolkata.offsetLabel == "UTC+5:30")
     #expect(kolkata.localTime(at: 20) == LocalTime(hour: 1, minute: 30, dayOffset: 1))
+  }
+
+  @Test func daylightSavingOffsetsUseTheSelectedDate() throws {
+    let newYork = City(
+      id: "America/New_York",
+      name: "New York",
+      utcOffsetMinutes: -300,
+      colorIndex: 0
+    )
+    let winter = try #require(ISO8601DateFormatter().date(from: "2026-01-15T00:00:00Z"))
+    let summer = try #require(ISO8601DateFormatter().date(from: "2026-07-15T00:00:00Z"))
+
+    #expect(newYork.utcOffsetMinutes(at: winter) == -300)
+    #expect(newYork.utcOffsetMinutes(at: summer) == -240)
+    #expect(newYork.localTime(at: 12, on: winter) == LocalTime(hour: 7, dayOffset: 0))
+    #expect(newYork.localTime(at: 12, on: summer) == LocalTime(hour: 8, dayOffset: 0))
+  }
+
+  @Test func searchAcceptsInternationalCityAndAirportCodes() {
+    #expect(TimeZoneCatalog.search("SFO").first?.id == "America/Los_Angeles")
+    #expect(TimeZoneCatalog.search("NYC").first?.id == "America/New_York")
+    #expect(TimeZoneCatalog.search("LHR").contains { $0.id == "Europe/London" })
+    #expect(TimeZoneCatalog.search("DEL").contains { $0.id == "Asia/Kolkata" })
+    #expect(TimeZoneCatalog.search("IST").contains { $0.id == "Asia/Kolkata" })
+  }
+
+  @Test func searchAcceptsStandardAndDaylightTimeZoneAbbreviations() {
+    #expect(TimeZoneCatalog.search("PST").contains { $0.id == "America/Los_Angeles" })
+    #expect(TimeZoneCatalog.search("PDT").contains { $0.id == "America/Los_Angeles" })
+    #expect(TimeZoneCatalog.search("CET").contains { $0.id == "Europe/Berlin" })
+    #expect(TimeZoneCatalog.search("CEST").contains { $0.id == "Europe/Paris" })
   }
 
   @Test func timeZoneListAllowsNoMoreThanFiveUniqueCities() {
@@ -104,4 +145,6 @@ struct MeetingStateTests {
       ) == ["sao-paulo", "new-york", "san-francisco", "london"]
     )
   }
+
+  private static let summer = ISO8601DateFormatter().date(from: "2026-07-15T00:00:00Z")!
 }

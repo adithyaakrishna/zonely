@@ -9,11 +9,8 @@ final class MenuBarController: NSObject {
   private var outsideClickMonitor: Any?
 
   override init() {
-    let rootView = MeetingFinderView(
-      model: model,
-      initiallyShowsTimeZonePicker: CommandLine.arguments.contains("--show-time-zone-picker")
-    )
-    .padding(16)
+    let rootView = MeetingFinderView(model: model)
+      .padding(16)
     let hostingView = NSHostingView(rootView: rootView)
     hostingView.frame = NSRect(x: 0, y: 0, width: 572, height: 346)
 
@@ -32,6 +29,7 @@ final class MenuBarController: NSObject {
   }
 
   func showPanel() {
+    model.refreshTimeZoneRules()
     let button = statusItem.button
     let buttonWindow = button?.window
     let menuBarScreen = NSScreen.screens.first { screen in
@@ -69,6 +67,12 @@ final class MenuBarController: NSObject {
     panel.setFrameOrigin(origin)
     panel.makeKeyAndOrderFront(nil)
     installOutsideClickMonitor()
+
+    if CommandLine.arguments.contains("--show-time-zone-picker") {
+      DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+        NotificationCenter.default.post(name: .showTimeZonePicker, object: nil)
+      }
+    }
   }
 
   func hidePanel() {

@@ -8,9 +8,9 @@ struct MeetingFinderView: View {
 
   private let cardSize = CGSize(width: 540, height: 314)
 
-  init(model: MeetingViewModel, initiallyShowsTimeZonePicker: Bool = false) {
+  init(model: MeetingViewModel) {
     self.model = model
-    _isShowingTimeZonePicker = State(initialValue: initiallyShowsTimeZonePicker)
+    _isShowingTimeZonePicker = State(initialValue: false)
   }
 
   var body: some View {
@@ -34,6 +34,9 @@ struct MeetingFinderView: View {
     .shadow(color: Color.black.opacity(0.035), radius: 2, x: 0, y: 1)
     .shadow(color: Color.black.opacity(0.085), radius: 16, x: 0, y: 8)
     .environment(\.colorScheme, .light)
+    .onReceive(NotificationCenter.default.publisher(for: .showTimeZonePicker)) { _ in
+      isShowingTimeZonePicker = true
+    }
   }
 
   private var header: some View {
@@ -208,6 +211,10 @@ struct MeetingFinderView: View {
     .padding(.horizontal, 24)
     .padding(.top, 1)
   }
+}
+
+extension Notification.Name {
+  static let showTimeZonePicker = Notification.Name("Zonely.showTimeZonePicker")
 }
 
 private struct TimelineGrid: View {

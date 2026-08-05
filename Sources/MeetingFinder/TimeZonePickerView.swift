@@ -1,8 +1,14 @@
+import AppKit
 import SwiftUI
 
 struct TimeZonePickerView: View {
   @ObservedObject var model: MeetingViewModel
   @State private var query = ""
+
+  private let selectedColumns = Array(
+    repeating: GridItem(.flexible(), spacing: 7, alignment: .top),
+    count: 3
+  )
 
   private var availableResults: [TimeZoneOption] {
     TimeZoneCatalog.search(query)
@@ -29,7 +35,7 @@ struct TimeZonePickerView: View {
         Image(systemName: "magnifyingglass")
           .font(.system(size: 11, weight: .medium))
           .foregroundStyle(.secondary)
-        TextField("Search city or time zone", text: $query)
+        TextField("Search city, code, or time zone", text: $query)
           .textFieldStyle(.plain)
           .font(.system(size: 12, design: .rounded))
       }
@@ -64,42 +70,59 @@ struct TimeZonePickerView: View {
     }
     .padding(16)
     .frame(width: 310, height: 390)
-    .presentationBackground(.thinMaterial)
+    .background(PopoverWindowStyler())
+    .presentationBackground(Color.white.opacity(0.97))
     .presentationCornerRadius(18)
   }
 
   private var selectedTimeZones: some View {
-    VStack(spacing: 2) {
+    LazyVGrid(columns: selectedColumns, alignment: .leading, spacing: 7) {
       ForEach(model.state.cities) { city in
-        HStack(spacing: 8) {
-          Circle()
-            .fill(city.color)
-            .frame(width: 7, height: 7)
-          VStack(alignment: .leading, spacing: 1) {
+        VStack(alignment: .leading, spacing: 3) {
+          HStack(spacing: 4) {
+            Circle()
+              .fill(city.color)
+              .frame(width: 6, height: 6)
             Text(city.name)
-              .font(.system(size: 11.5, weight: .medium, design: .rounded))
+              .font(.system(size: 9.5, weight: .semibold, design: .rounded))
               .lineLimit(1)
-            Text(city.offsetLabel)
-              .font(.system(size: 9.5, design: .monospaced))
-              .foregroundStyle(.secondary)
+              .minimumScaleFactor(0.84)
           }
-          Spacer()
-          Button {
-            model.removeTimeZone(id: city.id)
-          } label: {
-            Image(systemName: "xmark")
-              .font(.system(size: 9, weight: .bold))
-              .foregroundStyle(.secondary)
-              .frame(width: 22, height: 22)
-              .background(Color.primary.opacity(0.05), in: Circle())
+
+          HStack(spacing: 2) {
+            Text(
+              city.offsetLabel(
+                atUTC: model.state.selectedUTCHour,
+                on: model.state.referenceDate
+              )
+            )
+            .font(.system(size: 9, design: .monospaced))
+            .foregroundStyle(.secondary)
+            Spacer(minLength: 0)
+
+            Button {
+              model.removeTimeZone(id: city.id)
+            } label: {
+              Image(systemName: "xmark")
+                .font(.system(size: 7.5, weight: .bold))
+                .foregroundStyle(.secondary)
+                .frame(width: 14, height: 14)
+            }
+            .buttonStyle(.plain)
+            .disabled(model.state.cities.count == 1)
+            .help(
+              model.state.cities.count == 1
+                ? "At least one time zone is required" : "Remove \(city.name)")
           }
-          .buttonStyle(.plain)
-          .disabled(model.state.cities.count == 1)
-          .help(
-            model.state.cities.count == 1
-              ? "At least one time zone is required" : "Remove \(city.name)")
         }
-        .frame(height: 34)
+        .padding(.horizontal, 7)
+        .frame(height: 47)
+        .background(Color.primary.opacity(0.045), in: RoundedRectangle(cornerRadius: 9))
+        .overlay {
+          RoundedRectangle(cornerRadius: 9)
+            .strokeBorder(Color.primary.opacity(0.055), lineWidth: 0.5)
+        }
+        .help(city.name)
       }
     }
   }
@@ -128,6 +151,14 @@ struct TimeZonePickerView: View {
                   .lineLimit(1)
               }
               Spacer()
+              if let shortcut = TimeZoneCatalog.matchingShortcut(for: option, query: query) {
+                Text(shortcut.uppercased())
+                  .font(.system(size: 8.5, weight: .semibold, design: .rounded))
+                  .foregroundStyle(.secondary)
+                  .padding(.horizontal, 5)
+                  .frame(height: 17)
+                  .background(Color.primary.opacity(0.05), in: Capsule())
+              }
               Text(option.offsetLabel)
                 .font(.system(size: 9.5, design: .monospaced))
                 .foregroundStyle(.secondary)
@@ -149,5 +180,24 @@ struct TimeZonePickerView: View {
       }
     }
     .frame(maxHeight: .infinity)
+  }
+}
+
+private struct PopoverWindowStyler: NSViewRepresentable {
+  func makeNSView(context: Context) -> NSView {
+    PopoverStylingView()
+  }
+
+  func updateNSView(_ nsView: NSView, context: Context) {}
+}
+
+private final class PopoverStylingView: NSView {
+  override func viewDidMoveToWindow() {
+    super.viewDidMoveToWindow()
+    DispatchQueue.main.async { [weak self] in
+      guard let window = self?.window else { return }
+      window.hasShadow = false
+      window.invalidateShadow()
+    }
   }
 }

@@ -4,8 +4,15 @@ import SwiftUI
 struct City: Identifiable, Equatable, Sendable {
   let id: String
   let name: String
-  let utcOffsetMinutes: Int
   let colorIndex: Int
+  private let fallbackUTCOffsetMinutes: Int
+
+  init(id: String, name: String, utcOffsetMinutes: Int, colorIndex: Int) {
+    self.id = id
+    self.name = name
+    self.colorIndex = colorIndex
+    fallbackUTCOffsetMinutes = utcOffsetMinutes
+  }
 
   var color: Color {
     Self.palette[colorIndex % Self.palette.count]
@@ -15,8 +22,22 @@ struct City: Identifiable, Equatable, Sendable {
     Self.formatOffset(utcOffsetMinutes)
   }
 
-  func localTime(at utcHour: Int) -> LocalTime {
-    let unwrappedMinutes = (utcHour * 60) + utcOffsetMinutes
+  var utcOffsetMinutes: Int {
+    utcOffsetMinutes(at: Date())
+  }
+
+  func utcOffsetMinutes(at date: Date) -> Int {
+    guard let timeZone = TimeZone(identifier: id) else { return fallbackUTCOffsetMinutes }
+    return timeZone.secondsFromGMT(for: date) / 60
+  }
+
+  func offsetLabel(atUTC utcHour: Int, on date: Date = Date()) -> String {
+    Self.formatOffset(utcOffsetMinutes(at: Self.utcDate(hour: utcHour, on: date)))
+  }
+
+  func localTime(at utcHour: Int, on date: Date = Date()) -> LocalTime {
+    let selectedDate = Self.utcDate(hour: utcHour, on: date)
+    let unwrappedMinutes = (utcHour * 60) + utcOffsetMinutes(at: selectedDate)
     let dayOffset = Int(floor(Double(unwrappedMinutes) / 1_440.0))
     let minutesInDay = (unwrappedMinutes % 1_440 + 1_440) % 1_440
     return LocalTime(
@@ -52,6 +73,17 @@ struct City: Identifiable, Equatable, Sendable {
     }
     return String(format: "UTC%@%d:%02d", sign, hours, remainder)
   }
+
+  private static func utcDate(hour: Int, on date: Date) -> Date {
+    let startOfDay = utcCalendar.startOfDay(for: date)
+    return utcCalendar.date(byAdding: .hour, value: hour, to: startOfDay) ?? date
+  }
+
+  private static let utcCalendar: Calendar = {
+    var calendar = Calendar(identifier: .gregorian)
+    calendar.timeZone = TimeZone(secondsFromGMT: 0) ?? .gmt
+    return calendar
+  }()
 
   private static let palette: [Color] = [
     Color(red: 0.16, green: 0.45, blue: 0.94),
@@ -105,9 +137,10 @@ struct MeetingState: Equatable, Sendable {
 
   var selectedUTCHour: Int = 5
   var cities: [City] = Self.defaultCities
+  var referenceDate: Date = Date()
 
   var selectedTimes: [(city: City, time: LocalTime)] {
-    cities.map { ($0, $0.localTime(at: selectedUTCHour)) }
+    cities.map { ($0, $0.localTime(at: selectedUTCHour, on: referenceDate)) }
   }
 
   var workingCount: Int {
@@ -136,7 +169,7 @@ struct MeetingState: Equatable, Sendable {
   }
 
   func availability(for city: City, utcHour: Int) -> Availability {
-    let localTime = city.localTime(at: utcHour)
+    let localTime = city.localTime(at: utcHour, on: referenceDate)
     let localMinutes = (localTime.hour * 60) + localTime.minute
     if ((8 * 60)..<(9 * 60)).contains(localMinutes)
       || ((18 * 60)..<(19 * 60)).contains(localMinutes)
@@ -236,6 +269,10 @@ final class MeetingViewModel: ObservableObject {
     select(hour: bestAvailableHour())
   }
 
+  func refreshTimeZoneRules(at date: Date = Date()) {
+    state.referenceDate = date
+  }
+
   func addTimeZone(_ option: TimeZoneOption) {
     guard state.addTimeZone(option) else { return }
     persistTimeZones()
@@ -253,8 +290,12 @@ final class MeetingViewModel: ObservableObject {
 
   private func bestAvailableHour() -> Int {
     (0..<24).max { lhs, rhs in
-      let lhsCount = state.cities.count { $0.localTime(at: lhs).isWorkingHour }
-      let rhsCount = state.cities.count { $0.localTime(at: rhs).isWorkingHour }
+      let lhsCount = state.cities.count {
+        $0.localTime(at: lhs, on: state.referenceDate).isWorkingHour
+      }
+      let rhsCount = state.cities.count {
+        $0.localTime(at: rhs, on: state.referenceDate).isWorkingHour
+      }
       if lhsCount == rhsCount {
         return abs(lhs - Self.preferredHour) > abs(rhs - Self.preferredHour)
       }
