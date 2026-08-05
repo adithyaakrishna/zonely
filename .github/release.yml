@@ -1,0 +1,43 @@
+changelog:
+  exclude:
+    labels:
+      - skip-changelog
+      - duplicate
+      - invalid
+  categories:
+    - title: "💥 Breaking changes"
+      labels:
+        - breaking-change
+        - semver-major
+    - title: "✨ New features"
+      labels:
+        - enhancement
+        - feature
+        - semver-minor
+    - title: "🐛 Fixes"
+      labels:
+        - bug
+        - bugfix
+        - fix
+    - title: "⚡ Performance"
+      labels:
+        - performance
+    - title: "♿ Accessibility"
+      labels:
+        - accessibility
+    - title: "📚 Documentation"
+      labels:
+        - documentation
+        - docs
+    - title: "⬆️ Dependencies"
+      labels:
+        - dependencies
+    - title: "🧰 Maintenance"
+      labels:
+        - build
+        - chore
+        - ci
+        - refactor
+    - title: "🔖 Other changes"
+      labels:
+        - "*"

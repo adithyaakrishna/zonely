@@ -82,6 +82,10 @@ git push origin v1.0.0
 
 The workflow builds a universal app, signs it with the Developer ID certificate, notarizes and staples both the app and DMG, verifies Gatekeeper acceptance, creates checksums and provenance attestations, then publishes the artifacts to GitHub Releases.
 
+Release Drafter maintains a categorized draft release whenever pull requests are merged into `main`. It labels pull requests from their title, branch, and changed files; chooses the next semantic version from those labels; and groups changes into features, fixes, accessibility, performance, documentation, dependencies, and maintenance.
+
+After a signed release is published, the reusable Release Notes workflow regenerates its notes with GitHub's native release-notes API and the categories in `.github/release.yml`. It can also be run manually with an existing `vX.Y.Z` tag when notes need to be refreshed.
+
 Configure these repository secrets before creating a release tag:
 
 | Secret | Purpose |

@@ -25,6 +25,8 @@ jobs:
     name: Sign, notarize, and publish
     runs-on: macos-26
     timeout-minutes: 45
+    outputs:
+      tag: ${{ steps.version.outputs.tag }}
 
     steps:
       - name: Check out repository
@@ -165,6 +167,13 @@ jobs:
 
           if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
             gh release upload "$RELEASE_TAG" "${assets[@]}" --clobber
+
+            if [[ "$(gh release view "$RELEASE_TAG" --json isDraft --jq '.isDraft')" == "true" ]]; then
+              gh release edit "$RELEASE_TAG" \
+                --title "Zonely $RELEASE_TAG" \
+                --draft=false \
+                --latest
+            fi
           else
             gh release create "$RELEASE_TAG" "${assets[@]}" \
               --target "$GITHUB_SHA" \
@@ -178,3 +187,11 @@ jobs:
           if [[ -n "${SIGNING_KEYCHAIN:-}" ]]; then
             security delete-keychain "$SIGNING_KEYCHAIN" || true
           fi
+
+  release-notes:
+    name: Update release notes
+    needs: release
+    uses: ./.github/workflows/release-notes.yml
+    with:
+      tag: ${{ needs.release.outputs.tag }}
+    secrets: inherit

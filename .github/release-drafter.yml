@@ -1,0 +1,132 @@
+name-template: "Zonely v$RESOLVED_VERSION"
+tag-template: "v$RESOLVED_VERSION"
+tag-prefix: "v"
+change-template: "- $TITLE by @$AUTHOR in #$NUMBER"
+change-title-escapes: "\\<*_&"
+no-changes-template: "- No user-facing changes"
+sort-by: merged_at
+sort-direction: descending
+
+categories:
+  - type: pre-exclude
+    when:
+      labels:
+        - skip-changelog
+        - duplicate
+        - invalid
+
+  - title: "💥 Breaking changes"
+    semver-increment: major
+    exclusive: true
+    when:
+      labels:
+        - breaking-change
+        - semver-major
+
+  - title: "✨ New features"
+    semver-increment: minor
+    exclusive: true
+    when:
+      labels:
+        - enhancement
+        - feature
+        - semver-minor
+
+  - title: "🐛 Fixes"
+    semver-increment: patch
+    exclusive: true
+    when:
+      labels:
+        - bug
+        - bugfix
+        - fix
+
+  - title: "⚡ Performance"
+    semver-increment: patch
+    exclusive: true
+    when:
+      label: performance
+
+  - title: "♿ Accessibility"
+    semver-increment: patch
+    exclusive: true
+    when:
+      label: accessibility
+
+  - title: "📚 Documentation"
+    semver-increment: patch
+    exclusive: true
+    when:
+      labels:
+        - documentation
+        - docs
+
+  - title: "⬆️ Dependencies"
+    semver-increment: patch
+    exclusive: true
+    collapse-after: 5
+    when:
+      label: dependencies
+
+  - title: "🧰 Maintenance"
+    semver-increment: patch
+    exclusive: true
+    when:
+      labels:
+        - build
+        - chore
+        - ci
+        - refactor
+
+  - title: "🔖 Other changes"
+    semver-increment: patch
+
+autolabeler:
+  - label: enhancement
+    branch:
+      - "/^(feature|feat)\\/.+/"
+    title:
+      - "/^feat(\\(.+\\))?!?:/i"
+      - "/\\b(add|introduce|support)\\b/i"
+
+  - label: bug
+    branch:
+      - "/^(fix|bugfix)\\/.+/"
+    title:
+      - "/^fix(\\(.+\\))?!?:/i"
+      - "/\\b(fix|fixed|fixes|bug|regression)\\b/i"
+
+  - label: documentation
+    files:
+      - "**/*.md"
+    title:
+      - "/^docs(\\(.+\\))?!?:/i"
+
+  - label: ci
+    files:
+      - ".github/**"
+      - "script/**"
+    title:
+      - "/^ci(\\(.+\\))?!?:/i"
+
+  - label: accessibility
+    title:
+      - "/\\b(a11y|accessibility|voiceover)\\b/i"
+
+  - label: performance
+    title:
+      - "/^perf(\\(.+\\))?!?:/i"
+      - "/\\bperformance\\b/i"
+
+template: |
+  ## Download
+
+  Download the signed and notarized universal DMG below, then drag **Zonely** to **Applications**. SHA-256 checksum files are included with every binary archive.
+
+  ## What’s changed
+
+  $CHANGES
+
+  ## Contributors
+
+  $CONTRIBUTORS
