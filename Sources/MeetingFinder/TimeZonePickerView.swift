@@ -4,6 +4,7 @@ import SwiftUI
 struct TimeZonePickerView: View {
   @ObservedObject var model: MeetingViewModel
   @State private var query = ""
+  @State private var hoveredSelectedTimeZoneID: String?
 
   private let selectedColumns = Array(
     repeating: GridItem(.flexible(), spacing: 6, alignment: .top),
@@ -83,11 +84,7 @@ struct TimeZonePickerView: View {
   private var selectedTimeZones: some View {
     LazyVGrid(columns: selectedColumns, alignment: .leading, spacing: 7) {
       ForEach(model.state.cities) { city in
-        let relativeOffset = city.relativeOffsetLabel(
-          atUTC: model.state.selectedUTCHour,
-          on: model.state.referenceDate,
-          comparedTo: .autoupdatingCurrent
-        )
+        let relativeOffset = relativeOffset(for: city)
         VStack(alignment: .leading, spacing: 2) {
           HStack(spacing: 4) {
             Circle()
@@ -113,7 +110,6 @@ struct TimeZonePickerView: View {
               .foregroundStyle(.secondary)
               .frame(width: 12, height: 12)
               .contentShape(Rectangle())
-              .help("At least one time zone is required")
               .accessibilityLabel("At least one time zone is required")
           } else {
             Button {
@@ -136,23 +132,95 @@ struct TimeZonePickerView: View {
             .strokeBorder(Color.primary.opacity(0.045), lineWidth: 0.5)
         }
         .contentShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-        .help(selectedTimeZoneTooltip(for: city, relativeOffset: relativeOffset))
+        .onContinuousHover { phase in
+          switch phase {
+          case .active:
+            hoveredSelectedTimeZoneID = city.id
+          case .ended:
+            if hoveredSelectedTimeZoneID == city.id {
+              hoveredSelectedTimeZoneID = nil
+            }
+          }
+        }
+        .zIndex(hoveredSelectedTimeZoneID == city.id ? 20 : 0)
       }
     }
+    .overlay(alignment: .top) {
+      if let city = hoveredSelectedTimeZone {
+        selectedTimeZoneTooltip(for: city, relativeOffset: relativeOffset(for: city))
+          .offset(y: selectedTimeZoneGridHeight + 6)
+          .allowsHitTesting(false)
+          .transition(.opacity)
+          .zIndex(30)
+      }
+    }
+    .zIndex(20)
   }
 
-  private func selectedTimeZoneTooltip(for city: City, relativeOffset: String) -> String {
+  private var hoveredSelectedTimeZone: City? {
+    guard let hoveredSelectedTimeZoneID else { return nil }
+    return model.state.cities.first { $0.id == hoveredSelectedTimeZoneID }
+  }
+
+  private var selectedTimeZoneGridHeight: CGFloat {
+    model.state.cities.count > 3 ? 87 : 40
+  }
+
+  private func relativeOffset(for city: City) -> String {
+    city.relativeOffsetLabel(
+      atUTC: model.state.selectedUTCHour,
+      on: model.state.referenceDate,
+      comparedTo: .autoupdatingCurrent
+    )
+  }
+
+  private func selectedTimeZoneTooltip(for city: City, relativeOffset: String) -> some View {
     let fullTimeZoneName =
       TimeZone(identifier: city.id)?.localizedName(for: .generic, locale: .current) ?? city.id
     let currentTimeZone = TimeZone.autoupdatingCurrent
     let currentTimeZoneName =
       currentTimeZone.localizedName(for: .generic, locale: .current) ?? currentTimeZone.identifier
-    return """
-      \(city.name)
-      \(fullTimeZoneName)
-      \(city.id)
-      \(relativeOffset) · Your timezone: \(currentTimeZoneName)
-      """
+
+    return VStack(alignment: .leading, spacing: 3) {
+      HStack(spacing: 8) {
+        Text(city.name)
+          .font(.system(size: 10.5, weight: .semibold, design: .rounded))
+        Spacer(minLength: 8)
+        Text(relativeOffset)
+          .font(.system(size: 9, weight: .medium, design: .rounded))
+          .foregroundStyle(Color.white.opacity(0.72))
+      }
+
+      Text(fullTimeZoneName)
+        .font(.system(size: 9.5, design: .rounded))
+        .foregroundStyle(Color.white.opacity(0.82))
+
+      Text(city.id)
+        .font(.system(size: 8.5, design: .monospaced))
+        .foregroundStyle(Color.white.opacity(0.58))
+
+      Text(
+        model.state.cities.count == 1
+          ? "At least one time zone is required"
+          : "Your timezone: \(currentTimeZoneName)"
+      )
+      .font(.system(size: 8.5, design: .rounded))
+      .foregroundStyle(Color.white.opacity(0.64))
+    }
+    .foregroundStyle(.white)
+    .padding(.horizontal, 10)
+    .padding(.vertical, 8)
+    .frame(width: 268, alignment: .leading)
+    .background(
+      Color(red: 0.11, green: 0.11, blue: 0.12).opacity(0.96),
+      in: RoundedRectangle(cornerRadius: 9, style: .continuous)
+    )
+    .overlay {
+      RoundedRectangle(cornerRadius: 9, style: .continuous)
+        .strokeBorder(Color.white.opacity(0.10), lineWidth: 0.5)
+    }
+    .shadow(color: Color.black.opacity(0.18), radius: 8, x: 0, y: 4)
+    .accessibilityElement(children: .combine)
   }
 
   private var searchResults: some View {
