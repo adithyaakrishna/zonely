@@ -4,6 +4,26 @@ import Testing
 @testable import MeetingFinder
 
 struct MeetingStateTests {
+  @Test func timeZoneInfoDismissesOnlyOutsideInfoButtons() {
+    let frames = ["London": CGRect(x: 40, y: 20, width: 12, height: 12)]
+
+    #expect(
+      !TimeZonePickerInteraction.shouldDismissInfo(
+        at: CGPoint(x: 46, y: 26),
+        infoButtonFrames: frames
+      ))
+    #expect(
+      !TimeZonePickerInteraction.shouldDismissInfo(
+        at: CGPoint(x: 39, y: 19),
+        infoButtonFrames: frames
+      ))
+    #expect(
+      TimeZonePickerInteraction.shouldDismissInfo(
+        at: CGPoint(x: 12, y: 12),
+        infoButtonFrames: frames
+      ))
+  }
+
   @Test func timeZoneConversionWrapsAcrossDays() {
     let sanFrancisco = MeetingState.defaultCities[0]
     #expect(

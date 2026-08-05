@@ -5,6 +5,9 @@ struct TimeZonePickerView: View {
   @ObservedObject var model: MeetingViewModel
   @State private var query = ""
   @State private var selectedInfoTimeZoneID: String?
+  @State private var infoButtonFrames: [String: CGRect] = [:]
+
+  private let pickerCoordinateSpace = "timeZonePicker"
 
   private let selectedColumns = Array(
     repeating: GridItem(.flexible(), spacing: 10, alignment: .top),
@@ -84,6 +87,17 @@ struct TimeZonePickerView: View {
     .shadow(color: Color.black.opacity(0.13), radius: 16, x: 0, y: 8)
     .presentationBackground(Color.white.opacity(0.995))
     .presentationCornerRadius(18)
+    .coordinateSpace(name: pickerCoordinateSpace)
+    .onPreferenceChange(InfoButtonFramePreferenceKey.self) { frames in
+      infoButtonFrames = frames
+    }
+    .simultaneousGesture(
+      SpatialTapGesture(coordinateSpace: .named(pickerCoordinateSpace))
+        .onEnded { value in
+          dismissSelectedInfoIfNeeded(at: value.location)
+        },
+      including: .all
+    )
   }
 
   private var selectedTimeZones: some View {
@@ -122,17 +136,22 @@ struct TimeZonePickerView: View {
             }
             .buttonStyle(.plain)
             .modifier(PointingHandCursorModifier())
+            .background {
+              GeometryReader { proxy in
+                Color.clear.preference(
+                  key: InfoButtonFramePreferenceKey.self,
+                  value: [city.id: proxy.frame(in: .named(pickerCoordinateSpace))]
+                )
+              }
+            }
             .accessibilityLabel("Show details for \(city.name)")
 
             Button {
-              if model.state.cities.count == 1 {
-                selectedInfoTimeZoneID = city.id
-              } else {
-                if selectedInfoTimeZoneID == city.id {
-                  selectedInfoTimeZoneID = nil
-                }
-                model.removeTimeZone(id: city.id)
+              guard model.state.cities.count > 1 else { return }
+              if selectedInfoTimeZoneID == city.id {
+                selectedInfoTimeZoneID = nil
               }
+              model.removeTimeZone(id: city.id)
             } label: {
               Image(systemName: "xmark")
                 .font(.system(size: 7, weight: .bold))
@@ -177,6 +196,16 @@ struct TimeZonePickerView: View {
   private var selectedInfoTimeZone: City? {
     guard let selectedInfoTimeZoneID else { return nil }
     return model.state.cities.first { $0.id == selectedInfoTimeZoneID }
+  }
+
+  private func dismissSelectedInfoIfNeeded(at location: CGPoint) {
+    guard selectedInfoTimeZoneID != nil else { return }
+    if TimeZonePickerInteraction.shouldDismissInfo(
+      at: location,
+      infoButtonFrames: infoButtonFrames
+    ) {
+      selectedInfoTimeZoneID = nil
+    }
   }
 
   private var selectedTimeZoneGridHeight: CGFloat {
@@ -298,6 +327,25 @@ struct TimeZonePickerView: View {
       }
     }
     .frame(maxHeight: .infinity)
+  }
+}
+
+enum TimeZonePickerInteraction {
+  static func shouldDismissInfo(
+    at location: CGPoint,
+    infoButtonFrames: [String: CGRect]
+  ) -> Bool {
+    !infoButtonFrames.values.contains { frame in
+      frame.insetBy(dx: -2, dy: -2).contains(location)
+    }
+  }
+}
+
+private struct InfoButtonFramePreferenceKey: PreferenceKey {
+  static let defaultValue: [String: CGRect] = [:]
+
+  static func reduce(value: inout [String: CGRect], nextValue: () -> [String: CGRect]) {
+    value.merge(nextValue(), uniquingKeysWith: { _, newValue in newValue })
   }
 }
 
