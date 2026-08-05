@@ -140,7 +140,7 @@ jobs:
           subject-path: dist/Zonely-${{ steps.version.outputs.version }}-macos-universal.zip
 
       - name: Upload release artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: Zonely-${{ steps.version.outputs.version }}-signed-notarized
           path: |

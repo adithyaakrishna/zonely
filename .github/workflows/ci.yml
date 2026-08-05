@@ -59,7 +59,7 @@ jobs:
         run: ./script/verify_distribution.sh
 
       - name: Upload distribution artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: Zonely-macOS-universal-unsigned
           path: |
