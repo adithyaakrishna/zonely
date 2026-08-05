@@ -64,7 +64,8 @@ struct TimeZonePickerView: View {
     }
     .padding(16)
     .frame(width: 310, height: 390)
-    .background(Color(nsColor: .windowBackgroundColor))
+    .presentationBackground(.thinMaterial)
+    .presentationCornerRadius(18)
   }
 
   private var selectedTimeZones: some View {
