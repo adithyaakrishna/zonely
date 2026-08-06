@@ -1,51 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="940" height="700" viewBox="0 0 940 700">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
   <title>Zonely</title>
-  <defs>
-    <linearGradient id="cyan" x1="391" y1="0" x2="901" y2="0" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#26b9f4"/>
-      <stop offset="0.5" stop-color="#168cff"/>
-      <stop offset="1" stop-color="#3ee7ec"/>
-    </linearGradient>
-    <linearGradient id="purple" x1="215" y1="0" x2="725" y2="0" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#a725ff"/>
-      <stop offset="0.5" stop-color="#8a35ff"/>
-      <stop offset="1" stop-color="#b72cf2"/>
-    </linearGradient>
-    <linearGradient id="pink" x1="303" y1="0" x2="637" y2="0" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#ff2d8e"/>
-      <stop offset="1" stop-color="#ff5b6f"/>
-    </linearGradient>
-    <linearGradient id="orange" x1="479" y1="0" x2="813" y2="0" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#ff5b45"/>
-      <stop offset="1" stop-color="#ffad36"/>
-    </linearGradient>
-    <linearGradient id="yellow" x1="127" y1="0" x2="549" y2="0" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#ffbd37"/>
-      <stop offset="1" stop-color="#ff9f34"/>
-    </linearGradient>
-    <linearGradient id="glass" x1="382" y1="10" x2="558" y2="690" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#a9c8ff" stop-opacity="0.24"/>
-      <stop offset="0.48" stop-color="#eff6ff" stop-opacity="0.13"/>
-      <stop offset="1" stop-color="#80aaff" stop-opacity="0.24"/>
-    </linearGradient>
-  </defs>
-
-  <g fill="#263574" fill-opacity="0.72" stroke="#6073c5" stroke-opacity="0.48" stroke-width="4">
-    <rect x="39" y="160" width="70" height="65" rx="13"/><rect x="127" y="160" width="70" height="65" rx="13"/><rect x="215" y="160" width="70" height="65" rx="13"/><rect x="303" y="160" width="70" height="65" rx="13"/><rect x="391" y="160" width="70" height="65" rx="13"/><rect x="479" y="160" width="70" height="65" rx="13"/><rect x="567" y="160" width="70" height="65" rx="13"/><rect x="655" y="160" width="70" height="65" rx="13"/><rect x="743" y="160" width="70" height="65" rx="13"/><rect x="831" y="160" width="70" height="65" rx="13"/>
-    <rect x="39" y="243" width="70" height="65" rx="13"/><rect x="127" y="243" width="70" height="65" rx="13"/><rect x="215" y="243" width="70" height="65" rx="13"/><rect x="303" y="243" width="70" height="65" rx="13"/><rect x="391" y="243" width="70" height="65" rx="13"/><rect x="479" y="243" width="70" height="65" rx="13"/><rect x="567" y="243" width="70" height="65" rx="13"/><rect x="655" y="243" width="70" height="65" rx="13"/><rect x="743" y="243" width="70" height="65" rx="13"/><rect x="831" y="243" width="70" height="65" rx="13"/>
-    <rect x="39" y="326" width="70" height="65" rx="13"/><rect x="127" y="326" width="70" height="65" rx="13"/><rect x="215" y="326" width="70" height="65" rx="13"/><rect x="303" y="326" width="70" height="65" rx="13"/><rect x="391" y="326" width="70" height="65" rx="13"/><rect x="479" y="326" width="70" height="65" rx="13"/><rect x="567" y="326" width="70" height="65" rx="13"/><rect x="655" y="326" width="70" height="65" rx="13"/><rect x="743" y="326" width="70" height="65" rx="13"/><rect x="831" y="326" width="70" height="65" rx="13"/>
-    <rect x="39" y="409" width="70" height="65" rx="13"/><rect x="127" y="409" width="70" height="65" rx="13"/><rect x="215" y="409" width="70" height="65" rx="13"/><rect x="303" y="409" width="70" height="65" rx="13"/><rect x="391" y="409" width="70" height="65" rx="13"/><rect x="479" y="409" width="70" height="65" rx="13"/><rect x="567" y="409" width="70" height="65" rx="13"/><rect x="655" y="409" width="70" height="65" rx="13"/><rect x="743" y="409" width="70" height="65" rx="13"/><rect x="831" y="409" width="70" height="65" rx="13"/>
-    <rect x="39" y="492" width="70" height="65" rx="13"/><rect x="127" y="492" width="70" height="65" rx="13"/><rect x="215" y="492" width="70" height="65" rx="13"/><rect x="303" y="492" width="70" height="65" rx="13"/><rect x="391" y="492" width="70" height="65" rx="13"/><rect x="479" y="492" width="70" height="65" rx="13"/><rect x="567" y="492" width="70" height="65" rx="13"/><rect x="655" y="492" width="70" height="65" rx="13"/><rect x="743" y="492" width="70" height="65" rx="13"/><rect x="831" y="492" width="70" height="65" rx="13"/>
+  <g fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="9.25" stroke-width="2"/>
+    <path d="M7.7 8.2h8.6l-8.4 7.6h8.4" stroke-width="2.35"/>
   </g>
-
-  <g stroke="#ffffff" stroke-opacity="0.28" stroke-width="4">
-    <rect x="391" y="160" width="70" height="65" rx="13" fill="url(#cyan)"/><rect x="479" y="160" width="70" height="65" rx="13" fill="url(#cyan)"/><rect x="567" y="160" width="70" height="65" rx="13" fill="url(#cyan)"/><rect x="655" y="160" width="70" height="65" rx="13" fill="url(#cyan)"/><rect x="743" y="160" width="70" height="65" rx="13" fill="url(#cyan)"/><rect x="831" y="160" width="70" height="65" rx="13" fill="url(#cyan)"/>
-    <rect x="215" y="243" width="70" height="65" rx="13" fill="url(#purple)"/><rect x="303" y="243" width="70" height="65" rx="13" fill="url(#purple)"/><rect x="391" y="243" width="70" height="65" rx="13" fill="url(#purple)"/><rect x="479" y="243" width="70" height="65" rx="13" fill="url(#purple)"/><rect x="567" y="243" width="70" height="65" rx="13" fill="url(#purple)"/><rect x="655" y="243" width="70" height="65" rx="13" fill="url(#purple)"/>
-    <rect x="391" y="326" width="70" height="65" rx="13" fill="url(#purple)"/><rect x="479" y="326" width="70" height="65" rx="13" fill="url(#pink)"/><rect x="567" y="326" width="70" height="65" rx="13" fill="url(#pink)"/>
-    <rect x="303" y="409" width="70" height="65" rx="13" fill="url(#pink)"/><rect x="391" y="409" width="70" height="65" rx="13" fill="url(#pink)"/><rect x="479" y="409" width="70" height="65" rx="13" fill="url(#orange)"/><rect x="567" y="409" width="70" height="65" rx="13" fill="url(#orange)"/><rect x="655" y="409" width="70" height="65" rx="13" fill="url(#orange)"/><rect x="743" y="409" width="70" height="65" rx="13" fill="url(#orange)"/>
-    <rect x="127" y="492" width="70" height="65" rx="13" fill="url(#yellow)"/><rect x="215" y="492" width="70" height="65" rx="13" fill="url(#yellow)"/><rect x="303" y="492" width="70" height="65" rx="13" fill="url(#yellow)"/><rect x="391" y="492" width="70" height="65" rx="13" fill="url(#yellow)"/><rect x="479" y="492" width="70" height="65" rx="13" fill="url(#yellow)"/>
-  </g>
-
-  <rect x="382" y="10" width="176" height="680" rx="82" fill="url(#glass)" stroke="#b9d0ff" stroke-width="13"/>
-  <rect x="394" y="22" width="152" height="656" rx="70" fill="none" stroke="#ffffff" stroke-opacity="0.52" stroke-width="5"/>
 </svg>

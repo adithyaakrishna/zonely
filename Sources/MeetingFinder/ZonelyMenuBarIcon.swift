@@ -1,7 +1,7 @@
 import AppKit
 
 enum ZonelyMenuBarIcon {
-  private static let iconSize = NSSize(width: 20, height: 18)
+  private static let iconSize = NSSize(width: 18, height: 18)
 
   static func makeImage(bundle: Bundle = .main) -> NSImage {
     let sourceImage = menuBarArtwork(in: bundle) ?? applicationIcon(in: bundle)
@@ -17,7 +17,7 @@ enum ZonelyMenuBarIcon {
       )
       return true
     }
-    image.isTemplate = false
+    image.isTemplate = true
     image.accessibilityDescription = "Zonely"
     return image
   }
