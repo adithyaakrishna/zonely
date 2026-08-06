@@ -133,11 +133,8 @@ final class MenuBarController: NSObject {
     let size = MeetingFinderLayout.panelSize(for: cityCount)
     guard panel.frame.size != size else { return }
 
-    let resizedFrame = MeetingFinderLayout.panelFrame(
-      preservingTopOf: panel.frame,
-      for: cityCount
-    )
-    panel.setFrame(resizedFrame, display: true, animate: panel.isVisible)
+    let resize = MeetingFinderLayout.panelResize(from: panel.frame, for: cityCount)
+    panel.setFrame(resize.frame, display: true, animate: resize.animates)
   }
 
   @objc private func statusItemPressed(_ sender: NSStatusBarButton) {

@@ -56,6 +56,19 @@ enum MeetingFinderLayout {
       height: size.height
     )
   }
+
+  static func panelResize(from currentFrame: CGRect, for cityCount: Int) -> PanelResizeConfiguration
+  {
+    PanelResizeConfiguration(
+      frame: panelFrame(preservingTopOf: currentFrame, for: cityCount),
+      animates: false
+    )
+  }
+}
+
+struct PanelResizeConfiguration {
+  let frame: CGRect
+  let animates: Bool
 }
 
 struct MeetingFinderView: View {

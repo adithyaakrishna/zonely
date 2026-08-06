@@ -78,7 +78,11 @@ struct TimeZonePickerView: View {
       Color.white.opacity(0.995),
       in: RoundedRectangle(cornerRadius: 18, style: .continuous)
     )
-    .background(PopoverWindowStyler())
+    .background(
+      PopoverWindowStyler { location in
+        dismissSelectedInfoIfNeeded(at: location)
+      }
+    )
     .overlay {
       RoundedRectangle(cornerRadius: 18, style: .continuous)
         .strokeBorder(Color.black.opacity(0.06), lineWidth: 0.5)
@@ -91,94 +95,25 @@ struct TimeZonePickerView: View {
     .onPreferenceChange(InfoButtonFramePreferenceKey.self) { frames in
       infoButtonFrames = frames
     }
-    .simultaneousGesture(
-      SpatialTapGesture(coordinateSpace: .named(pickerCoordinateSpace))
-        .onEnded { value in
-          dismissSelectedInfoIfNeeded(at: value.location)
-        },
-      including: .all
-    )
   }
 
   private var selectedTimeZones: some View {
     LazyVGrid(columns: selectedColumns, alignment: .leading, spacing: 10) {
       ForEach(model.state.cities) { city in
-        let relativeOffset = relativeOffset(for: city)
-        VStack(alignment: .leading, spacing: 2) {
-          HStack(spacing: 4) {
-            Circle()
-              .fill(city.color)
-              .frame(width: 5.5, height: 5.5)
-            Text(city.name)
-              .font(.system(size: 9, weight: .semibold, design: .rounded))
-              .lineLimit(1)
-              .minimumScaleFactor(0.84)
+        SelectedTimeZoneCard(
+          city: city,
+          relativeOffset: relativeOffset(for: city),
+          cityCount: model.state.cities.count,
+          pickerCoordinateSpace: pickerCoordinateSpace,
+          onToggleInfo: {
+            selectedInfoTimeZoneID =
+              selectedInfoTimeZoneID == city.id ? nil : city.id
+          },
+          onRemove: {
+            selectedInfoTimeZoneID = nil
+            model.removeTimeZone(id: city.id)
           }
-          .padding(.trailing, 28)
-
-          Text(relativeOffset)
-            .font(.system(size: 8, design: .rounded))
-            .foregroundStyle(.secondary)
-            .lineLimit(1)
-            .minimumScaleFactor(0.68)
-        }
-        .overlay(alignment: .topTrailing) {
-          HStack(spacing: 1) {
-            Button {
-              selectedInfoTimeZoneID =
-                selectedInfoTimeZoneID == city.id ? nil : city.id
-            } label: {
-              Image(systemName: "info.circle")
-                .font(.system(size: 8, weight: .medium))
-                .foregroundStyle(.secondary)
-                .frame(width: 12, height: 12)
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-            .modifier(PointingHandCursorModifier())
-            .background {
-              GeometryReader { proxy in
-                Color.clear.preference(
-                  key: InfoButtonFramePreferenceKey.self,
-                  value: [city.id: proxy.frame(in: .named(pickerCoordinateSpace))]
-                )
-              }
-            }
-            .accessibilityLabel("Show details for \(city.name)")
-
-            Button {
-              guard model.state.cities.count > 1 else { return }
-              if selectedInfoTimeZoneID == city.id {
-                selectedInfoTimeZoneID = nil
-              }
-              model.removeTimeZone(id: city.id)
-            } label: {
-              Image(systemName: "xmark")
-                .font(.system(size: 7, weight: .bold))
-                .foregroundStyle(.secondary)
-                .frame(width: 12, height: 12)
-            }
-            .buttonStyle(.plain)
-            .modifier(PointingHandCursorModifier())
-            .opacity(model.state.cities.count == 1 ? 0.42 : 1)
-            .help(
-              model.state.cities.count == 1
-                ? "At least one time zone is required" : "Remove \(city.name)"
-            )
-            .accessibilityLabel("Remove \(city.name)")
-            .accessibilityHint(
-              model.state.cities.count == 1 ? "At least one time zone is required" : ""
-            )
-          }
-        }
-        .padding(.horizontal, 6)
-        .frame(height: 40)
-        .background(Color.primary.opacity(0.04), in: RoundedRectangle(cornerRadius: 8))
-        .overlay {
-          RoundedRectangle(cornerRadius: 8)
-            .strokeBorder(Color.primary.opacity(0.045), lineWidth: 0.5)
-        }
-        .contentShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+        )
         .zIndex(selectedInfoTimeZoneID == city.id ? 20 : 0)
       }
     }
@@ -279,6 +214,7 @@ struct TimeZonePickerView: View {
       LazyVStack(spacing: 5) {
         ForEach(availableResults.prefix(40)) { option in
           Button {
+            selectedInfoTimeZoneID = nil
             model.addTimeZone(option)
             query = ""
           } label: {
@@ -330,7 +266,129 @@ struct TimeZonePickerView: View {
   }
 }
 
+private struct SelectedTimeZoneCard: View {
+  let city: City
+  let relativeOffset: String
+  let cityCount: Int
+  let pickerCoordinateSpace: String
+  let onToggleInfo: () -> Void
+  let onRemove: () -> Void
+
+  @State private var horizontalDragOffset: CGFloat = 0
+  @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+  var body: some View {
+    VStack(alignment: .leading, spacing: 2) {
+      HStack(spacing: 4) {
+        Circle()
+          .fill(city.color)
+          .frame(width: 5.5, height: 5.5)
+        Text(city.name)
+          .font(.system(size: 9, weight: .semibold, design: .rounded))
+          .lineLimit(1)
+          .minimumScaleFactor(0.84)
+      }
+      .padding(.trailing, 32)
+
+      Text(relativeOffset)
+        .font(.system(size: 8, design: .rounded))
+        .foregroundStyle(.secondary)
+        .lineLimit(1)
+        .minimumScaleFactor(0.68)
+    }
+    .overlay(alignment: .topTrailing) {
+      HStack(spacing: 1) {
+        Button(action: onToggleInfo) {
+          Image(systemName: "info.circle")
+            .font(.system(size: 8, weight: .medium))
+            .foregroundStyle(.secondary)
+            .frame(width: 14, height: 14)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .modifier(PointingHandCursorModifier())
+        .background {
+          GeometryReader { proxy in
+            Color.clear.preference(
+              key: InfoButtonFramePreferenceKey.self,
+              value: [city.id: proxy.frame(in: .named(pickerCoordinateSpace))]
+            )
+          }
+        }
+        .accessibilityLabel("Show details for \(city.name)")
+
+        Button {
+          guard cityCount > 1 else { return }
+          onRemove()
+        } label: {
+          Image(systemName: "xmark")
+            .font(.system(size: 7, weight: .bold))
+            .foregroundStyle(.secondary)
+            .frame(width: 14, height: 14)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .modifier(PointingHandCursorModifier())
+        .opacity(cityCount == 1 ? 0.42 : 1)
+        .help(
+          cityCount == 1
+            ? "At least one time zone is required" : "Remove \(city.name)"
+        )
+        .accessibilityLabel("Remove \(city.name)")
+        .accessibilityHint(cityCount == 1 ? "At least one time zone is required" : "")
+      }
+    }
+    .padding(.horizontal, 6)
+    .frame(height: 40)
+    .background(Color.primary.opacity(0.04), in: RoundedRectangle(cornerRadius: 8))
+    .overlay {
+      RoundedRectangle(cornerRadius: 8)
+        .strokeBorder(Color.primary.opacity(0.045), lineWidth: 0.5)
+    }
+    .contentShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+    .offset(x: horizontalDragOffset)
+    .opacity(1 - min(abs(horizontalDragOffset) / 180, 0.22))
+    .simultaneousGesture(horizontalRemovalGesture)
+    .accessibilityAction(.delete) {
+      guard cityCount > 1 else { return }
+      onRemove()
+    }
+  }
+
+  private var horizontalRemovalGesture: some Gesture {
+    DragGesture(minimumDistance: 8)
+      .onChanged { value in
+        guard abs(value.translation.width) > abs(value.translation.height) else { return }
+        horizontalDragOffset = value.translation.width
+      }
+      .onEnded { value in
+        if TimeZonePickerInteraction.shouldRemoveTimeZone(
+          translation: value.translation,
+          cityCount: cityCount
+        ) {
+          onRemove()
+          horizontalDragOffset = 0
+          return
+        }
+
+        if reduceMotion {
+          horizontalDragOffset = 0
+        } else {
+          withAnimation(.spring(response: 0.24, dampingFraction: 1)) {
+            horizontalDragOffset = 0
+          }
+        }
+      }
+  }
+}
+
 enum TimeZonePickerInteraction {
+  static func shouldRemoveTimeZone(translation: CGSize, cityCount: Int) -> Bool {
+    guard cityCount > 1 else { return false }
+    let horizontalDistance = abs(translation.width)
+    return horizontalDistance >= 36 && horizontalDistance > abs(translation.height) * 1.25
+  }
+
   static func shouldDismissInfo(
     at location: CGPoint,
     infoButtonFrames: [String: CGRect]
@@ -367,20 +425,47 @@ private struct PointingHandCursorModifier: ViewModifier {
 }
 
 private struct PopoverWindowStyler: NSViewRepresentable {
-  func makeNSView(context: Context) -> NSView {
-    PopoverStylingView()
+  let onMouseDown: (CGPoint) -> Void
+
+  func makeNSView(context: Context) -> PopoverStylingView {
+    let view = PopoverStylingView()
+    view.onMouseDown = onMouseDown
+    return view
   }
 
-  func updateNSView(_ nsView: NSView, context: Context) {}
+  func updateNSView(_ nsView: PopoverStylingView, context: Context) {
+    nsView.onMouseDown = onMouseDown
+  }
 }
 
 private final class PopoverStylingView: NSView {
+  var onMouseDown: ((CGPoint) -> Void)?
+  private var mouseDownMonitor: Any?
+
+  override var isFlipped: Bool { true }
+
   override func viewDidMoveToWindow() {
     super.viewDidMoveToWindow()
+    removeMouseDownMonitor()
+
     DispatchQueue.main.async { [weak self] in
       guard let window = self?.window else { return }
       window.hasShadow = false
       window.invalidateShadow()
     }
+
+    guard let window else { return }
+    mouseDownMonitor = NSEvent.addLocalMonitorForEvents(matching: .leftMouseDown) {
+      [weak self, weak window] event in
+      guard let self, let window, event.window === window else { return event }
+      onMouseDown?(convert(event.locationInWindow, from: nil))
+      return event
+    }
+  }
+
+  private func removeMouseDownMonitor() {
+    guard let mouseDownMonitor else { return }
+    NSEvent.removeMonitor(mouseDownMonitor)
+    self.mouseDownMonitor = nil
   }
 }

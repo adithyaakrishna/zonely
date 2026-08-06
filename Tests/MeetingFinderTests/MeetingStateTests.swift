@@ -33,6 +33,34 @@ struct MeetingStateTests {
       ))
   }
 
+  @Test func horizontalSwipeRemovesOnlyAfterThreshold() {
+    #expect(
+      TimeZonePickerInteraction.shouldRemoveTimeZone(
+        translation: CGSize(width: -40, height: 4),
+        cityCount: 3
+      ))
+    #expect(
+      TimeZonePickerInteraction.shouldRemoveTimeZone(
+        translation: CGSize(width: 40, height: -3),
+        cityCount: 3
+      ))
+    #expect(
+      !TimeZonePickerInteraction.shouldRemoveTimeZone(
+        translation: CGSize(width: 35, height: 0),
+        cityCount: 3
+      ))
+    #expect(
+      !TimeZonePickerInteraction.shouldRemoveTimeZone(
+        translation: CGSize(width: 40, height: 34),
+        cityCount: 3
+      ))
+    #expect(
+      !TimeZonePickerInteraction.shouldRemoveTimeZone(
+        translation: CGSize(width: 60, height: 0),
+        cityCount: 1
+      ))
+  }
+
   @Test func timeZoneConversionWrapsAcrossDays() {
     let sanFrancisco = MeetingState.defaultCities[0]
     #expect(
@@ -174,6 +202,15 @@ struct MeetingStateTests {
     let resizedFrame = MeetingFinderLayout.panelFrame(preservingTopOf: currentFrame, for: 1)
     #expect(resizedFrame.maxY == currentFrame.maxY)
     #expect(resizedFrame.height == oneZoneHeight)
+  }
+
+  @Test func panelResizePreservesTopAndAvoidsCompetingNativeAnimation() {
+    let original = CGRect(x: 40, y: 300, width: 572, height: 420)
+    let resize = MeetingFinderLayout.panelResize(from: original, for: 6)
+
+    #expect(resize.frame.maxY == original.maxY)
+    #expect(resize.frame.size == MeetingFinderLayout.panelSize(for: 6))
+    #expect(!resize.animates)
   }
 
   @Test func atLeastOneTimeZoneMustRemain() {
