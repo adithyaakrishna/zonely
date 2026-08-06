@@ -65,6 +65,20 @@ struct TimeZoneReorderSession: Equatable {
   }
 }
 
+enum ReorderPresentation {
+  static let selectorLayer: Double = 10
+  static let siblingAnimation = Animation.spring(response: 0.16, dampingFraction: 0.92)
+  static let settleAnimation = Animation.spring(response: 0.18, dampingFraction: 0.90)
+
+  static func layer(for cityID: String, session: TimeZoneReorderSession?) -> Double {
+    session?.cityID == cityID ? 100 : 0
+  }
+
+  static func timelineRowsLayer(for session: TimeZoneReorderSession?) -> Double {
+    session == nil ? 0 : 20
+  }
+}
+
 struct DraggableCityLabelRow: View {
   let city: City
   let cityIndex: Int
@@ -129,7 +143,8 @@ struct DraggableCityLabelRow: View {
     }
     .frame(height: rowHeight, alignment: .topLeading)
     .offset(y: rowOffset)
-    .zIndex(isDragging ? 10 : 0)
+    .zIndex(ReorderPresentation.layer(for: city.id, session: reorderSession))
+    .animation(siblingReorderAnimation, value: reorderDestinationIndex)
     .animation(.easeOut(duration: 0.12), value: isHoveringHandle)
   }
 
@@ -174,7 +189,7 @@ struct DraggableCityLabelRow: View {
         if reduceMotion {
           commitMove()
         } else {
-          withAnimation(.easeInOut(duration: 0.18)) {
+          withAnimation(ReorderPresentation.settleAnimation) {
             commitMove()
           }
         }
@@ -194,6 +209,18 @@ struct DraggableCityLabelRow: View {
 
   private var isDragging: Bool {
     reorderSession?.cityID == city.id
+  }
+
+  private var reorderDestinationIndex: Int? {
+    reorderSession?.destinationIndex(
+      rowHeight: rowHeight,
+      itemCount: model.state.cities.count
+    )
+  }
+
+  private var siblingReorderAnimation: Animation? {
+    guard !reduceMotion, !isDragging else { return nil }
+    return ReorderPresentation.siblingAnimation
   }
 
   private var rowOffset: CGFloat {

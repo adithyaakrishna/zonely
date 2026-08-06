@@ -75,6 +75,7 @@ struct MeetingFinderView: View {
   @ObservedObject var model: MeetingViewModel
   @State private var isShowingTimeZonePicker: Bool
   @State private var reorderSession: TimeZoneReorderSession?
+  @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
   init(model: MeetingViewModel) {
     self.model = model
@@ -216,9 +217,9 @@ struct MeetingFinderView: View {
         }
         .frame(height: cityRowHeight, alignment: .topLeading)
         .offset(y: reorderOffset(for: city, at: index))
-        .zIndex(reorderSession?.cityID == city.id ? 10 : 0)
+        .zIndex(ReorderPresentation.layer(for: city.id, session: reorderSession))
         .animation(
-          reorderSession?.cityID == city.id ? nil : .easeInOut(duration: 0.16),
+          siblingReorderAnimation(for: city.id),
           value: reorderDestinationIndex
         )
       }
@@ -243,6 +244,11 @@ struct MeetingFinderView: View {
       rowHeight: cityRowHeight,
       itemCount: model.state.cities.count
     ) ?? 0
+  }
+
+  private func siblingReorderAnimation(for cityID: String) -> Animation? {
+    guard !reduceMotion, reorderSession?.cityID != cityID else { return nil }
+    return ReorderPresentation.siblingAnimation
   }
 
   private var footer: some View {
@@ -307,6 +313,7 @@ private struct TimelineGrid: View {
   let reorderSession: TimeZoneReorderSession?
   @State private var dragPositionX: CGFloat?
   @State private var isPointerInsideGrid = false
+  @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
   private let labelHeight = TimelineMetrics.labelHeight
   private let cellGap = TimelineMetrics.hourGap
@@ -340,17 +347,19 @@ private struct TimelineGrid: View {
               }
             }
             .offset(y: reorderOffset(for: city, at: index))
-            .zIndex(reorderSession?.cityID == city.id ? 10 : 0)
+            .zIndex(ReorderPresentation.layer(for: city.id, session: reorderSession))
             .animation(
-              reorderSession?.cityID == city.id ? nil : .easeInOut(duration: 0.16),
+              siblingReorderAnimation(for: city.id),
               value: reorderDestinationIndex
             )
           }
         }
         .offset(y: labelHeight)
+        .zIndex(ReorderPresentation.timelineRowsLayer(for: reorderSession))
 
         selectionIndicator
           .offset(x: selectionX, y: 0)
+          .zIndex(ReorderPresentation.selectorLayer)
       }
       .contentShape(Rectangle())
       .coordinateSpace(name: "timelineGrid")
@@ -450,6 +459,11 @@ private struct TimelineGrid: View {
       rowHeight: rowHeight,
       itemCount: model.state.cities.count
     ) ?? 0
+  }
+
+  private func siblingReorderAnimation(for cityID: String) -> Animation? {
+    guard !reduceMotion, reorderSession?.cityID != cityID else { return nil }
+    return ReorderPresentation.siblingAnimation
   }
 
   @ViewBuilder

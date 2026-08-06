@@ -253,6 +253,17 @@ struct MeetingStateTests {
     )
   }
 
+  @Test func draggedTimeZoneUsesTheTopReorderLayer() {
+    let session = TimeZoneReorderSession(cityID: "san-francisco", sourceIndex: 0)
+
+    #expect(ReorderPresentation.layer(for: "san-francisco", session: session) > 0)
+    #expect(ReorderPresentation.layer(for: "london", session: session) == 0)
+    #expect(
+      ReorderPresentation.timelineRowsLayer(for: session)
+        > ReorderPresentation.selectorLayer
+    )
+  }
+
   private static let summer = ISO8601DateFormatter().date(from: "2026-07-15T00:00:00Z")!
   private static let utc = TimeZone(secondsFromGMT: 0)!
 }
