@@ -1,0 +1,284 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		AA0000000000000000000030 /* DraggableCityLabelRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000020 /* DraggableCityLabelRow.swift */; };
+		AA0000000000000000000031 /* MeetingFinderApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000021 /* MeetingFinderApp.swift */; };
+		AA0000000000000000000032 /* MeetingFinderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000022 /* MeetingFinderView.swift */; };
+		AA0000000000000000000033 /* MeetingState.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000023 /* MeetingState.swift */; };
+		AA0000000000000000000034 /* MenuBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000024 /* MenuBarController.swift */; };
+		AA0000000000000000000035 /* TimeZoneCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000025 /* TimeZoneCatalog.swift */; };
+		AA0000000000000000000036 /* TimeZonePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000026 /* TimeZonePickerView.swift */; };
+		AA0000000000000000000037 /* ZonelyMenuBarIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000027 /* ZonelyMenuBarIcon.swift */; };
+		AA0000000000000000000038 /* Zonely.icns in Resources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000028 /* Zonely.icns */; };
+		AA0000000000000000000039 /* ZonelyMenuBar.svg in Resources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000029 /* ZonelyMenuBar.svg */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		AA0000000000000000000008 /* Zonely.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Zonely.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA0000000000000000000020 /* DraggableCityLabelRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DraggableCityLabelRow.swift; sourceTree = "<group>"; };
+		AA0000000000000000000021 /* MeetingFinderApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingFinderApp.swift; sourceTree = "<group>"; };
+		AA0000000000000000000022 /* MeetingFinderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingFinderView.swift; sourceTree = "<group>"; };
+		AA0000000000000000000023 /* MeetingState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingState.swift; sourceTree = "<group>"; };
+		AA0000000000000000000024 /* MenuBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarController.swift; sourceTree = "<group>"; };
+		AA0000000000000000000025 /* TimeZoneCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeZoneCatalog.swift; sourceTree = "<group>"; };
+		AA0000000000000000000026 /* TimeZonePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeZonePickerView.swift; sourceTree = "<group>"; };
+		AA0000000000000000000027 /* ZonelyMenuBarIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZonelyMenuBarIcon.swift; sourceTree = "<group>"; };
+		AA0000000000000000000028 /* Zonely.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = Zonely.icns; sourceTree = "<group>"; };
+		AA0000000000000000000029 /* ZonelyMenuBar.svg */ = {isa = PBXFileReference; lastKnownFileType = image.svg; path = ZonelyMenuBar.svg; sourceTree = "<group>"; };
+		AA000000000000000000002A /* Zonely-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Zonely-Info.plist"; sourceTree = "<group>"; };
+		AA000000000000000000002B /* ZonelyAppStore.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ZonelyAppStore.entitlements; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		AA000000000000000000000B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		AA0000000000000000000002 = {
+			isa = PBXGroup;
+			children = (
+				AA0000000000000000000004 /* Sources */,
+				AA0000000000000000000005 /* Assets */,
+				AA0000000000000000000006 /* Config */,
+				AA0000000000000000000003 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		AA0000000000000000000003 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				AA0000000000000000000008 /* Zonely.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		AA0000000000000000000004 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				AA0000000000000000000020 /* DraggableCityLabelRow.swift */,
+				AA0000000000000000000021 /* MeetingFinderApp.swift */,
+				AA0000000000000000000022 /* MeetingFinderView.swift */,
+				AA0000000000000000000023 /* MeetingState.swift */,
+				AA0000000000000000000024 /* MenuBarController.swift */,
+				AA0000000000000000000025 /* TimeZoneCatalog.swift */,
+				AA0000000000000000000026 /* TimeZonePickerView.swift */,
+				AA0000000000000000000027 /* ZonelyMenuBarIcon.swift */,
+			);
+			path = Sources/MeetingFinder;
+			sourceTree = "<group>";
+		};
+		AA0000000000000000000005 /* Assets */ = {
+			isa = PBXGroup;
+			children = (
+				AA0000000000000000000028 /* Zonely.icns */,
+				AA0000000000000000000029 /* ZonelyMenuBar.svg */,
+			);
+			path = Assets;
+			sourceTree = "<group>";
+		};
+		AA0000000000000000000006 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				AA000000000000000000002A /* Zonely-Info.plist */,
+				AA000000000000000000002B /* ZonelyAppStore.entitlements */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		AA0000000000000000000007 /* Zonely */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AA0000000000000000000011 /* Build configuration list for PBXNativeTarget "Zonely" */;
+			buildPhases = (
+				AA0000000000000000000009 /* Sources */,
+				AA000000000000000000000B /* Frameworks */,
+				AA000000000000000000000A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Zonely;
+			productName = Zonely;
+			productReference = AA0000000000000000000008 /* Zonely.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		AA0000000000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2660;
+				LastUpgradeCheck = 2660;
+				TargetAttributes = {
+					AA0000000000000000000007 = {
+						CreatedOnToolsVersion = 26.6;
+					};
+				};
+			};
+			buildConfigurationList = AA000000000000000000000E /* Build configuration list for PBXProject "Zonely" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = AA0000000000000000000002;
+			productRefGroup = AA0000000000000000000003 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				AA0000000000000000000007 /* Zonely */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		AA000000000000000000000A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AA0000000000000000000038 /* Zonely.icns in Resources */,
+				AA0000000000000000000039 /* ZonelyMenuBar.svg in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		AA0000000000000000000009 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AA0000000000000000000030 /* DraggableCityLabelRow.swift in Sources */,
+				AA0000000000000000000031 /* MeetingFinderApp.swift in Sources */,
+				AA0000000000000000000032 /* MeetingFinderView.swift in Sources */,
+				AA0000000000000000000033 /* MeetingState.swift in Sources */,
+				AA0000000000000000000034 /* MenuBarController.swift in Sources */,
+				AA0000000000000000000035 /* TimeZoneCatalog.swift in Sources */,
+				AA0000000000000000000036 /* TimeZonePickerView.swift in Sources */,
+				AA0000000000000000000037 /* ZonelyMenuBarIcon.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		AA000000000000000000000C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		AA000000000000000000000D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		AA000000000000000000000F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Config/ZonelyAppStore.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_HARDENED_RUNTIME = YES;
+				EXECUTABLE_NAME = MeetingFinder;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "Config/Zonely-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.adikris.Zonely;
+				PRODUCT_NAME = Zonely;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		AA0000000000000000000010 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
+				CODE_SIGN_ENTITLEMENTS = Config/ZonelyAppStore.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_HARDENED_RUNTIME = YES;
+				EXECUTABLE_NAME = MeetingFinder;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "Config/Zonely-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.adikris.Zonely;
+				PRODUCT_NAME = Zonely;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		AA000000000000000000000E /* Build configuration list for PBXProject "Zonely" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA000000000000000000000C /* Debug */,
+				AA000000000000000000000D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AA0000000000000000000011 /* Build configuration list for PBXNativeTarget "Zonely" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA000000000000000000000F /* Debug */,
+				AA0000000000000000000010 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = AA0000000000000000000001 /* Project object */;
+}

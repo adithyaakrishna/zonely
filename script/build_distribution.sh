@@ -7,6 +7,7 @@ BUILD_NUMBER="${BUILD_NUMBER:-1}"
 OUTPUT_DIR="${OUTPUT_DIR:-$ROOT_DIR/dist}"
 SIGNING_IDENTITY="${SIGNING_IDENTITY:--}"
 NOTARIZE="${NOTARIZE:-0}"
+NOTARY_KEYCHAIN_PROFILE="${NOTARY_KEYCHAIN_PROFILE:-}"
 
 APP_PATH="$OUTPUT_DIR/Zonely.app"
 ZIP_PATH="$OUTPUT_DIR/Zonely-$VERSION-macos-universal.zip"
@@ -17,10 +18,27 @@ if [[ "$NOTARIZE" == "1" ]]; then
     echo "NOTARIZE=1 requires a Developer ID Application SIGNING_IDENTITY" >&2
     exit 2
   fi
-  : "${APPLE_ID:?APPLE_ID is required when NOTARIZE=1}"
-  : "${APPLE_TEAM_ID:?APPLE_TEAM_ID is required when NOTARIZE=1}"
-  : "${APPLE_APP_SPECIFIC_PASSWORD:?APPLE_APP_SPECIFIC_PASSWORD is required when NOTARIZE=1}"
+  if [[ -z "$NOTARY_KEYCHAIN_PROFILE" ]]; then
+    : "${APPLE_ID:?APPLE_ID is required when NOTARIZE=1 without NOTARY_KEYCHAIN_PROFILE}"
+    : "${APPLE_TEAM_ID:?APPLE_TEAM_ID is required when NOTARIZE=1 without NOTARY_KEYCHAIN_PROFILE}"
+    : "${APPLE_APP_SPECIFIC_PASSWORD:?APPLE_APP_SPECIFIC_PASSWORD is required when NOTARIZE=1 without NOTARY_KEYCHAIN_PROFILE}"
+  fi
 fi
+
+submit_for_notarization() {
+  local artifact_path="$1"
+  if [[ -n "$NOTARY_KEYCHAIN_PROFILE" ]]; then
+    xcrun notarytool submit "$artifact_path" \
+      --keychain-profile "$NOTARY_KEYCHAIN_PROFILE" \
+      --wait
+  else
+    xcrun notarytool submit "$artifact_path" \
+      --apple-id "$APPLE_ID" \
+      --team-id "$APPLE_TEAM_ID" \
+      --password "$APPLE_APP_SPECIFIC_PASSWORD" \
+      --wait
+  fi
+}
 
 TEMP_DIR="$(mktemp -d "${TMPDIR:-/tmp}/zonely-release.XXXXXX")"
 cleanup() {
@@ -39,11 +57,7 @@ UNIVERSAL=1 \
 if [[ "$NOTARIZE" == "1" ]]; then
   PRE_NOTARY_ZIP="$TEMP_DIR/Zonely-pre-notary.zip"
   ditto -c -k --keepParent "$APP_PATH" "$PRE_NOTARY_ZIP"
-  xcrun notarytool submit "$PRE_NOTARY_ZIP" \
-    --apple-id "$APPLE_ID" \
-    --team-id "$APPLE_TEAM_ID" \
-    --password "$APPLE_APP_SPECIFIC_PASSWORD" \
-    --wait
+  submit_for_notarization "$PRE_NOTARY_ZIP"
   xcrun stapler staple "$APP_PATH"
   xcrun stapler validate "$APP_PATH"
   spctl --assess --type execute --verbose=4 "$APP_PATH"
@@ -58,11 +72,7 @@ SIGNING_IDENTITY="$SIGNING_IDENTITY" \
   "$ROOT_DIR/script/create_dmg.sh"
 
 if [[ "$NOTARIZE" == "1" ]]; then
-  xcrun notarytool submit "$DMG_PATH" \
-    --apple-id "$APPLE_ID" \
-    --team-id "$APPLE_TEAM_ID" \
-    --password "$APPLE_APP_SPECIFIC_PASSWORD" \
-    --wait
+  submit_for_notarization "$DMG_PATH"
   xcrun stapler staple "$DMG_PATH"
   xcrun stapler validate "$DMG_PATH"
   spctl --assess --type open --context context:primary-signature --verbose=4 "$DMG_PATH"

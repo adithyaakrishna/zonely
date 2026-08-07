@@ -1,9 +1,6 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - "v*.*.*"
   workflow_dispatch:
     inputs:
       version:
@@ -76,7 +73,7 @@ jobs:
 
       - name: Lint and test
         run: |
-          bash -n script/*.sh
+          bash -n script/*.sh script/lib/*.sh
           swift format lint --recursive --strict Sources Tests Package.swift
           swift test --parallel
 

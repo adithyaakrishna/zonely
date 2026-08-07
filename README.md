@@ -71,31 +71,73 @@ VERSION=0.1.0 BUILD_NUMBER=1 ./script/build_distribution.sh
 VERSION=0.1.0 ./script/verify_distribution.sh
 ```
 
-Local distribution builds are ad-hoc signed. Public releases are Developer ID signed, notarized by Apple, stapled, Gatekeeper-verified, and published by GitHub Actions.
+Local distribution builds are ad-hoc signed. Public releases are Developer ID signed, notarized by Apple, stapled, Gatekeeper-verified, and published to GitHub Releases.
 
 ## Releases
 
-Push a semantic version tag to start the release workflow:
+Zonely has two local release channels behind one command:
 
 ```bash
-git tag v1.0.0
-git push origin v1.0.0
+./script/release.sh github 1.0.0
+./script/release.sh app-store 1.0.0
 ```
 
-The workflow builds a universal app, signs it with the Developer ID certificate, notarizes and staples both the app and DMG, verifies Gatekeeper acceptance, creates checksums and provenance attestations, then publishes the artifacts to GitHub Releases.
+Run the one-time interactive setup first:
+
+```bash
+./script/setup_release_credentials.sh all
+```
+
+The setup uses the Developer ID Application identity installed in the login Keychain, saves notarization credentials in a named macOS Keychain profile, checks GitHub CLI authentication, and records only non-secret settings in the ignored `.env` file. It does not require a base64 certificate or Apple password in the repository.
+
+If `.env` still contains the old certificate or Apple password values from the runner workflow, remove those entries after the Keychain profile is working. Local releases do not use them.
+
+Always rehearse each channel without publishing:
+
+```bash
+./script/release.sh github 1.0.0 --dry-run
+./script/release.sh app-store 1.0.0 --dry-run
+```
+
+### GitHub release
+
+The GitHub command runs lint and tests, builds a universal app, signs it with the local Developer ID certificate, notarizes and staples the app and DMG, verifies Gatekeeper acceptance, creates checksums and categorized release notes, creates and pushes the version tag, and publishes all artifacts with `gh`. A real release requires a clean Git worktree. Publishing locally does not start a release runner.
+
+Prerequisites:
+
+- A Developer ID Application certificate created in Xcode under **Settings > Accounts > Manage Certificates**.
+- An authenticated GitHub CLI session from `gh auth login`.
+- A working `Zonely-Notary` Keychain profile created by the setup script.
+
+### Mac App Store release
+
+The App Store command runs lint and tests, archives the checked-in `Zonely.xcodeproj` application target, applies App Sandbox and hardened runtime, uses Xcode automatic signing and provisioning, validates the archive, and uploads it to App Store Connect.
+
+Before the first upload:
+
+- Register the explicit app ID `com.adikris.Zonely` in the Apple Developer portal.
+- Create the matching macOS app record in App Store Connect.
+- Add the team Apple Account in **Xcode > Settings > Accounts**.
+- Run `./script/setup_release_credentials.sh app-store` to save the Team ID locally.
+
+After upload processing finishes, choose the build and complete screenshots, pricing, privacy, compliance, and **Submit for Review** in App Store Connect. These review decisions intentionally remain manual.
+
+### Manual runner fallback
+
+The GitHub Actions release workflow is available through **Actions > Release > Run workflow** as a fallback. It is manual-only, so tags created by a local release do not start a duplicate runner release.
 
 Release Drafter maintains a categorized draft release whenever pull requests are merged into `main`. It labels pull requests from their title, branch, and changed files; chooses the next semantic version from those labels; and groups changes into features, fixes, accessibility, performance, documentation, dependencies, and maintenance.
 
-After a signed release is published, the reusable Release Notes workflow regenerates its notes with GitHub's native release-notes API and the categories in `.github/release.yml`. It can also be run manually with an existing `vX.Y.Z` tag when notes need to be refreshed.
+The reusable Release Notes workflow remains available to regenerate notes manually with an existing `vX.Y.Z` tag when notes need to be refreshed from a runner.
 
-Configure these repository secrets before creating a release tag:
+Configure these repository secrets only if you want to use the manual runner fallback:
 
 | Secret | Purpose |
 | --- | --- |
 | `DEVELOPER_ID_CERTIFICATE_BASE64` | Base64-encoded Developer ID Application `.p12` certificate |
 | `DEVELOPER_ID_CERTIFICATE_PASSWORD` | Password used when exporting the `.p12` |
 | `APPLE_ID` | Apple ID used for notarization |
-| `APPLE_TEAM_ID` | Apple Developer Program Team ID |
+| `TEAM_ID` | Apple Developer Program Team ID |
 | `APPLE_APP_SPECIFIC_PASSWORD` | App-specific password for `notarytool` |
 
 To encode the certificate on macOS:

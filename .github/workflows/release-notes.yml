@@ -13,14 +13,12 @@ on:
         description: Existing release tag to update, for example v1.0.0
         required: true
         type: string
-  release:
-    types: [published]
 
 permissions:
   contents: write
 
 concurrency:
-  group: release-notes-${{ inputs.tag || github.event.release.tag_name }}
+  group: release-notes-${{ inputs.tag }}
   cancel-in-progress: true
 
 jobs:
@@ -30,7 +28,7 @@ jobs:
     timeout-minutes: 10
     env:
       GH_TOKEN: ${{ github.token }}
-      RELEASE_TAG: ${{ inputs.tag || github.event.release.tag_name }}
+      RELEASE_TAG: ${{ inputs.tag }}
 
     steps:
       - name: Validate release

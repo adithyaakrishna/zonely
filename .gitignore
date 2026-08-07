@@ -3,6 +3,33 @@ dist/
 .DS_Store
 Assets/Zonely.iconset/
 Assets/ZonelyAppIcon-source.png
+
+# Raw capture inputs may include browser, IDE, and desktop context.
+/AppStoreAssets/source/
+/AppStoreAssets/capture_zonely_windows
+
+# Signing credentials and local provisioning material.
 *.p12
+*.p8
 *.keychain-db
+*.mobileprovision
+*.provisionprofile
+
 .superpowers/
+
+# Local environment overrides may contain credentials.
+.env
+.env.*
+!.env.example
+
+# Astro dependencies and generated output.
+node_modules/
+.astro/
+site-dist/
+
+# Xcode per-user and derived state.
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+*.xccheckout
+DerivedData/
