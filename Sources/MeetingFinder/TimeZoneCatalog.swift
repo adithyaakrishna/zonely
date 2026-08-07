@@ -87,6 +87,16 @@ enum TimeZoneCatalog {
     }
   }
 
+  static func merging(
+    catalogResults: [TimeZoneOption],
+    cityResults: [TimeZoneOption]
+  ) -> [TimeZoneOption] {
+    var seenIdentifiers = Set<String>()
+    return (cityResults + catalogResults).filter { option in
+      seenIdentifiers.insert(option.id).inserted
+    }
+  }
+
   static func matchingShortcut(for option: TimeZoneOption, query: String) -> String? {
     let foldedQuery = fold(query.trimmingCharacters(in: .whitespacesAndNewlines))
     guard !foldedQuery.isEmpty else { return nil }

@@ -4,6 +4,8 @@ import SwiftUI
 struct TimeZonePickerView: View {
   @ObservedObject var model: MeetingViewModel
   @State private var query = ""
+  @State private var citySearchResults: [TimeZoneOption] = []
+  @State private var citySearchPhase: CitySearchPhase = .idle
   @State private var selectedInfoTimeZoneID: String?
   @State private var infoButtonFrames: [String: CGRect] = [:]
 
@@ -15,10 +17,13 @@ struct TimeZonePickerView: View {
   )
 
   private var availableResults: [TimeZoneOption] {
-    TimeZoneCatalog.search(query)
-      .filter { option in
-        !model.state.cities.contains(where: { $0.id == option.id })
-      }
+    TimeZoneCatalog.merging(
+      catalogResults: TimeZoneCatalog.search(query),
+      cityResults: citySearchResults
+    )
+    .filter { option in
+      !model.state.cities.contains(where: { $0.id == option.id })
+    }
   }
 
   var body: some View {
@@ -39,7 +44,7 @@ struct TimeZonePickerView: View {
         Image(systemName: "magnifyingglass")
           .font(.system(size: 11, weight: .medium))
           .foregroundStyle(.secondary)
-        TextField("Search city, code, or time zone", text: $query)
+        TextField("Search any city or time zone", text: $query)
           .textFieldStyle(.plain)
           .font(.system(size: 12, design: .rounded))
       }
@@ -94,6 +99,9 @@ struct TimeZonePickerView: View {
     .coordinateSpace(name: pickerCoordinateSpace)
     .onPreferenceChange(InfoButtonFramePreferenceKey.self) { frames in
       infoButtonFrames = frames
+    }
+    .task(id: query) {
+      await searchWorldwideCities(for: query)
     }
   }
 
@@ -228,7 +236,7 @@ struct TimeZonePickerView: View {
                   .font(.system(size: 11.5, weight: .medium, design: .rounded))
                   .foregroundStyle(.primary)
                   .lineLimit(1)
-                Text(option.id)
+                Text(searchDetail(for: option))
                   .font(.system(size: 9.5, design: .rounded))
                   .foregroundStyle(.secondary)
                   .lineLimit(1)
@@ -254,16 +262,83 @@ struct TimeZonePickerView: View {
           .disabled(model.state.cities.count == MeetingState.maximumCityCount)
         }
 
-        if availableResults.isEmpty {
-          Text(query.isEmpty ? "No more suggestions" : "No matching time zones")
-            .font(.system(size: 11, design: .rounded))
-            .foregroundStyle(.secondary)
-            .frame(maxWidth: .infinity, minHeight: 54)
+        if citySearchPhase == .searching {
+          HStack(spacing: 7) {
+            ProgressView()
+              .controlSize(.mini)
+            Text("Searching cities worldwide…")
+              .font(.system(size: 10, design: .rounded))
+              .foregroundStyle(.secondary)
+          }
+          .frame(maxWidth: .infinity, minHeight: 34)
+          .accessibilityElement(children: .combine)
+        }
+
+        if availableResults.isEmpty && citySearchPhase != .searching {
+          VStack(spacing: 3) {
+            Text(emptyResultsTitle)
+              .font(.system(size: 11, design: .rounded))
+            if citySearchPhase == .unavailable {
+              Text("Check your internet connection and try again")
+                .font(.system(size: 9.5, design: .rounded))
+            }
+          }
+          .foregroundStyle(.secondary)
+          .frame(maxWidth: .infinity, minHeight: 54)
         }
       }
     }
     .frame(maxHeight: .infinity)
   }
+
+  private var emptyResultsTitle: String {
+    if query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+      return "No more suggestions"
+    }
+    return citySearchPhase == .unavailable
+      ? "City search is unavailable" : "No matching cities or time zones"
+  }
+
+  private func searchDetail(for option: TimeZoneOption) -> String {
+    guard option.detail.localizedCaseInsensitiveCompare(option.id) != .orderedSame else {
+      return option.id
+    }
+    return "\(option.detail) · \(option.id)"
+  }
+
+  @MainActor
+  private func searchWorldwideCities(for rawQuery: String) async {
+    let normalizedQuery = rawQuery.trimmingCharacters(in: .whitespacesAndNewlines)
+    citySearchResults = []
+
+    guard normalizedQuery.count >= CityTimeZoneSearch.minimumQueryLength else {
+      citySearchPhase = .idle
+      return
+    }
+
+    citySearchPhase = .searching
+
+    do {
+      try await Task.sleep(for: .milliseconds(350))
+      let results = try await CityTimeZoneSearch.search(normalizedQuery)
+      try Task.checkCancellation()
+      guard query.trimmingCharacters(in: .whitespacesAndNewlines) == normalizedQuery else { return }
+      citySearchResults = results
+      citySearchPhase = .finished
+    } catch is CancellationError {
+      return
+    } catch {
+      guard !Task.isCancelled else { return }
+      citySearchPhase = .unavailable
+    }
+  }
+}
+
+private enum CitySearchPhase {
+  case idle
+  case searching
+  case finished
+  case unavailable
 }
 
 private struct SelectedTimeZoneCard: View {

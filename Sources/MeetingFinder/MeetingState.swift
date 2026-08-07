@@ -262,12 +262,23 @@ final class MeetingViewModel: ObservableObject {
 
   private let defaults: UserDefaults
   private static let storedTimeZonesKey = "selectedTimeZoneIdentifiers"
+  private static let storedCitiesKey = "selectedCities"
 
   init(defaults: UserDefaults = .standard) {
     self.defaults = defaults
     var state = MeetingState()
 
-    if let identifiers = defaults.stringArray(forKey: Self.storedTimeZonesKey),
+    if let storedCities = Self.decodeStoredCities(from: defaults.data(forKey: Self.storedCitiesKey))
+    {
+      let restoredCities = storedCities.prefix(MeetingState.maximumCityCount).enumerated()
+        .compactMap { index, storedCity in
+          City.timeZone(
+            identifier: storedCity.timeZoneIdentifier, name: storedCity.cityName, colorIndex: index)
+        }
+      if !restoredCities.isEmpty {
+        state.cities = restoredCities
+      }
+    } else if let identifiers = defaults.stringArray(forKey: Self.storedTimeZonesKey),
       !identifiers.isEmpty
     {
       let restoredCities = identifiers.prefix(MeetingState.maximumCityCount).enumerated().compactMap
@@ -326,7 +337,21 @@ final class MeetingViewModel: ObservableObject {
 
   private func persistTimeZones() {
     defaults.set(state.cities.map(\.id), forKey: Self.storedTimeZonesKey)
+    let storedCities = state.cities.map {
+      StoredCity(timeZoneIdentifier: $0.id, cityName: $0.name)
+    }
+    defaults.set(try? JSONEncoder().encode(storedCities), forKey: Self.storedCitiesKey)
+  }
+
+  private static func decodeStoredCities(from data: Data?) -> [StoredCity]? {
+    guard let data else { return nil }
+    return try? JSONDecoder().decode([StoredCity].self, from: data)
   }
 
   private static let preferredHour = MeetingState.bestUTCHour
+}
+
+private struct StoredCity: Codable {
+  let timeZoneIdentifier: String
+  let cityName: String
 }

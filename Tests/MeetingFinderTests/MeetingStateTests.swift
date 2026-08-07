@@ -155,6 +155,68 @@ struct MeetingStateTests {
     #expect(TimeZoneCatalog.search("CEST").contains { $0.id == "Europe/Paris" })
   }
 
+  @Test func worldwideCityResultUsesTheResolvedTimeZone() throws {
+    let results = CityTimeZoneSearch.options(
+      from: [
+        GeocodedCityCandidate(
+          cityName: "Pune",
+          administrativeArea: "Maharashtra",
+          country: "India",
+          timeZoneIdentifier: "Asia/Kolkata"
+        )
+      ],
+      query: "Pune"
+    )
+    let pune = try #require(results.first)
+
+    #expect(pune.cityName == "Pune")
+    #expect(pune.detail == "Maharashtra, India")
+    #expect(pune.id == "Asia/Kolkata")
+  }
+
+  @Test func worldwideCityResultsComeBeforeCatalogMatchesAndDeduplicateTimeZones() {
+    let catalogResult = TimeZoneOption(
+      id: "Europe/London",
+      cityName: "London",
+      detail: "United Kingdom Time",
+      utcOffsetMinutes: 0
+    )
+    let cityResult = TimeZoneOption(
+      id: "Europe/London",
+      cityName: "Cambridge",
+      detail: "England, United Kingdom",
+      utcOffsetMinutes: 0
+    )
+
+    let merged = TimeZoneCatalog.merging(
+      catalogResults: [catalogResult],
+      cityResults: [cityResult]
+    )
+
+    #expect(merged == [cityResult])
+  }
+
+  @MainActor
+  @Test func selectedWorldwideCityNamePersistsAcrossLaunches() throws {
+    let suiteName = "MeetingStateTests.\(UUID().uuidString)"
+    let defaults = try #require(UserDefaults(suiteName: suiteName))
+    defer { defaults.removePersistentDomain(forName: suiteName) }
+
+    let model = MeetingViewModel(defaults: defaults)
+    model.addTimeZone(
+      TimeZoneOption(
+        id: "Asia/Kolkata",
+        cityName: "Pune",
+        detail: "Maharashtra, India",
+        utcOffsetMinutes: 330
+      ))
+
+    let restoredModel = MeetingViewModel(defaults: defaults)
+    let restoredPune = try #require(
+      restoredModel.state.cities.first { $0.id == "Asia/Kolkata" })
+    #expect(restoredPune.name == "Pune")
+  }
+
   @Test func timeZoneListAllowsNoMoreThanSixUniqueCities() {
     var state = MeetingState()
     let kolkata = TimeZoneOption(
