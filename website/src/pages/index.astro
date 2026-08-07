@@ -1,0 +1,393 @@
+---
+import zonelyIcon from "../../../Assets/ZonelyAppIcon.png";
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const description =
+  "A focused macOS menu-bar utility for finding humane meeting times across time zones.";
+---
+
+<BaseLayout
+  title="Zonely — Humane meeting times across time zones"
+  description={description}
+>
+  <main class="page-shell">
+    <section class="intro" aria-labelledby="page-title">
+      <h1 id="page-title"><span aria-hidden="true">/</span>zonely</h1>
+      <p>{description}</p>
+    </section>
+
+    <section class="demo" aria-label="Zonely app preview">
+      <div class="demo__frame" data-demo-frame>
+        <video
+          class="demo__video"
+          data-demo-video
+          muted
+          loop
+          playsinline
+          preload="metadata"
+          aria-label="A screen recording of Zonely"
+        >
+          <source src="/zonely-demo.webm" type="video/webm" />
+          <source src="/zonely-demo.mp4" type="video/mp4" />
+        </video>
+
+        <div class="demo__placeholder" aria-hidden="true">
+          <img
+            src={zonelyIcon.src}
+            width="72"
+            height="72"
+            alt=""
+            decoding="async"
+          />
+        </div>
+
+        <button
+          class="demo__control"
+          data-demo-control
+          type="button"
+          aria-label="Pause screen recording"
+          hidden
+        >
+          <svg class="demo__pause-icon" viewBox="0 0 16 16" aria-hidden="true">
+            <path d="M5.25 4v8M10.75 4v8"></path>
+          </svg>
+          <svg class="demo__play-icon" viewBox="0 0 16 16" aria-hidden="true">
+            <path d="m5.5 3.75 7 4.25-7 4.25z"></path>
+          </svg>
+        </button>
+      </div>
+    </section>
+
+    <nav class="actions" aria-label="Get Zonely">
+      <a
+        class="button button--primary"
+        href="https://github.com/adithyaakrishna/zonely/releases/latest"
+      >
+        <svg viewBox="0 0 20 20" aria-hidden="true">
+          <path
+            d="M10 2.75v9.5m0 0 3.5-3.5m-3.5 3.5-3.5-3.5M4 14.75v1.5c0 .55.45 1 1 1h10c.55 0 1-.45 1-1v-1.5"
+          ></path>
+        </svg>
+        <span>Download for macOS</span>
+      </a>
+
+      <a
+        class="button button--secondary"
+        href="https://github.com/adithyaakrishna/zonely"
+        target="_blank"
+        rel="noreferrer"
+        aria-label="Star Zonely on GitHub (opens in a new tab)"
+      >
+        <svg class="github-mark" viewBox="0 0 16 16" aria-hidden="true">
+          <path
+            d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"
+          ></path>
+        </svg>
+        <span>Star on GitHub</span>
+      </a>
+    </nav>
+
+    <footer class="site-footer">
+      <span class="site-footer__made">
+        <span class="visually-hidden">Made with love in blr.</span>
+        <span aria-hidden="true">Made with</span>
+        <svg class="site-footer__heart" viewBox="0 0 16 16" aria-hidden="true">
+          <path
+            d="M8 13.2 2.7 8.08A3.28 3.28 0 0 1 7.34 3.44L8 4.1l.66-.66a3.28 3.28 0 0 1 4.64 4.64L8 13.2Z"
+          ></path>
+        </svg>
+        <span aria-hidden="true">in blr.</span>
+        <span class="site-footer__dot" aria-hidden="true"></span>
+      </span>
+
+      <nav class="site-footer__legal" aria-label="Legal">
+        <button type="button" data-drawer-open="license">License</button>
+        <span class="site-footer__dot" aria-hidden="true"></span>
+        <button type="button" data-drawer-open="privacy">Privacy Policy</button>
+      </nav>
+    </footer>
+  </main>
+
+  <div class="drawer" data-drawer hidden>
+    <button
+      class="drawer__backdrop"
+      type="button"
+      data-drawer-close
+      tabindex="-1"
+      aria-label="Close"
+    ></button>
+
+    <div
+      class="drawer__panel"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="drawer-title-license"
+      tabindex="-1"
+      data-drawer-panel
+    >
+      <div class="drawer__chrome">
+        <div class="drawer__handle" aria-hidden="true"></div>
+        <button
+          class="drawer__close"
+          type="button"
+          data-drawer-close
+          aria-label="Close"
+        >
+          <svg viewBox="0 0 16 16" aria-hidden="true">
+            <path d="M4 4l8 8M12 4l-8 8"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div class="drawer__body" data-drawer-body>
+        <article class="legal" data-drawer-view="license" hidden>
+          <h2 id="drawer-title-license">MIT License</h2>
+          <p class="legal__meta">Copyright © 2026 Adithya Krishna</p>
+
+          <p>
+            Permission is hereby granted, free of charge, to any person obtaining
+            a copy of this software and associated documentation files (the
+            “Software”), to deal in the Software without restriction, including
+            without limitation the rights to use, copy, modify, merge, publish,
+            distribute, sublicense, and/or sell copies of the Software, and to
+            permit persons to whom the Software is furnished to do so, subject to
+            the following conditions:
+          </p>
+
+          <p>
+            The above copyright notice and this permission notice shall be
+            included in all copies or substantial portions of the Software.
+          </p>
+
+          <p>
+            THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
+            EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+            MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+            NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+            BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+            ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+            CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+            SOFTWARE.
+          </p>
+        </article>
+
+        <article class="legal" data-drawer-view="privacy" hidden>
+          <h2 id="drawer-title-privacy">Privacy Policy</h2>
+          <p class="legal__meta">Last updated: August 7, 2026</p>
+
+          <p>
+            Zonely does not collect, transmit, sell, rent, or share personal
+            data.
+          </p>
+
+          <p>Zonely does not include:</p>
+          <ul>
+            <li>User accounts</li>
+            <li>Analytics</li>
+            <li>Advertising</li>
+            <li>Tracking</li>
+            <li>Third-party runtime SDKs</li>
+            <li>Network services</li>
+          </ul>
+
+          <p>
+            The time zones selected in Zonely are stored locally on your Mac
+            using macOS UserDefaults. This information is not transmitted to the
+            developer or any third party.
+          </p>
+
+          <p>
+            Zonely uses time-zone information provided by macOS to calculate
+            local times, UTC offsets, and daylight-saving changes.
+          </p>
+
+          <p>
+            If you open a GitHub issue, any information you voluntarily provide
+            will be used only to respond to your request. GitHub’s privacy
+            practices may also apply.
+          </p>
+
+          <p>
+            For privacy questions, open an issue on &nbsp;
+            <a
+              href="https://github.com/adithyaakrishna/zonely/issues"
+              target="_blank"
+              rel="noreferrer">GitHub</a
+            >.
+          </p>
+        </article>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  const frame = document.querySelector<HTMLElement>("[data-demo-frame]");
+  const video = document.querySelector<HTMLVideoElement>("[data-demo-video]");
+  const control =
+    document.querySelector<HTMLButtonElement>("[data-demo-control]");
+
+  if (frame && video && control) {
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    const updateControl = () => {
+      const isPlaying = !video.paused && !video.ended;
+      control.dataset.playing = String(isPlaying);
+      control.setAttribute(
+        "aria-label",
+        isPlaying ? "Pause screen recording" : "Play screen recording",
+      );
+    };
+
+    const revealVideo = async () => {
+      frame.dataset.ready = "true";
+      control.hidden = false;
+
+      if (!reduceMotion.matches) {
+        try {
+          await video.play();
+        } catch {
+          // Some browsers require an explicit gesture even for muted media.
+        }
+      }
+
+      updateControl();
+    };
+
+    video.addEventListener("canplay", revealVideo, { once: true });
+    video.addEventListener("play", updateControl);
+    video.addEventListener("pause", updateControl);
+
+    control.addEventListener("click", async () => {
+      if (video.paused) {
+        await video.play();
+      } else {
+        video.pause();
+      }
+    });
+
+    reduceMotion.addEventListener("change", ({ matches }) => {
+      if (matches) {
+        video.pause();
+      }
+    });
+  }
+
+  const drawer = document.querySelector<HTMLElement>("[data-drawer]");
+  const panel = document.querySelector<HTMLElement>("[data-drawer-panel]");
+  const views = document.querySelectorAll<HTMLElement>("[data-drawer-view]");
+  const openers = document.querySelectorAll<HTMLButtonElement>("[data-drawer-open]");
+  const closers = document.querySelectorAll("[data-drawer-close]");
+
+  if (drawer && panel) {
+    let lastFocus: HTMLElement | null = null;
+
+    const getFocusable = () =>
+      Array.from(
+        panel.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((el) => !el.hasAttribute("hidden") && el.offsetParent !== null);
+
+    const setView = (name: string) => {
+      views.forEach((view) => {
+        const isActive = view.dataset.drawerView === name;
+        view.hidden = !isActive;
+      });
+
+      const title = document.getElementById(`drawer-title-${name}`);
+      if (title) panel.setAttribute("aria-labelledby", title.id);
+    };
+
+    const openDrawer = (name: string) => {
+      lastFocus = document.activeElement as HTMLElement | null;
+      setView(name);
+      drawer.hidden = false;
+
+      const body = drawer.querySelector<HTMLElement>("[data-drawer-body]");
+      if (body) body.scrollTop = 0;
+
+      requestAnimationFrame(() => {
+        drawer.dataset.open = "true";
+        document.body.dataset.drawerOpen = "true";
+        panel.focus();
+      });
+    };
+
+    const closeDrawer = () => {
+      if (drawer.hidden || drawer.dataset.open !== "true") return;
+
+      drawer.dataset.open = "false";
+      document.body.removeAttribute("data-drawer-open");
+
+      let settled = false;
+      const finish = () => {
+        if (settled) return;
+        settled = true;
+        drawer.hidden = true;
+        views.forEach((view) => {
+          view.hidden = true;
+        });
+        lastFocus?.focus();
+        lastFocus = null;
+      };
+
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+      if (reduceMotion.matches) {
+        finish();
+        return;
+      }
+
+      const onTransitionEnd = (event: TransitionEvent) => {
+        if (event.target !== panel || event.propertyName !== "transform") return;
+        panel.removeEventListener("transitionend", onTransitionEnd);
+        finish();
+      };
+
+      panel.addEventListener("transitionend", onTransitionEnd);
+      window.setTimeout(finish, 320);
+    };
+
+    openers.forEach((button) => {
+      button.addEventListener("click", () => {
+        const name = button.dataset.drawerOpen;
+        if (name) openDrawer(name);
+      });
+    });
+
+    closers.forEach((el) => {
+      el.addEventListener("click", closeDrawer);
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (drawer.hidden) return;
+
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeDrawer();
+        return;
+      }
+
+      if (event.key !== "Tab") return;
+
+      const focusable = getFocusable();
+      if (focusable.length === 0) {
+        event.preventDefault();
+        panel.focus();
+        return;
+      }
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const active = document.activeElement;
+
+      if (event.shiftKey && (active === first || active === panel)) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && active === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    });
+  }
+</script>

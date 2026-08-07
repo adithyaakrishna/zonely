@@ -1,0 +1,26 @@
+{
+  "name": "zonely",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "author": {
+    "name": "Adithya Krishna",
+    "url": "https://github.com/adithyaakrishna/zonely"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/adithyaakrishna/zonely"
+  },
+  "bugs": {
+    "url": "https://github.com/adithyaakrishna/zonely/issues"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "astro": "^7.2.0"
+  }
+}
