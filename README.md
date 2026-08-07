@@ -19,7 +19,7 @@ Zonely turns the working day in each city into one compact timeline. Move the gl
 - Lives entirely in the macOS menu bar.
 - Shows working, edge, and off-hours across up to six time zones.
 - Supports fractional UTC offsets such as India Standard Time.
-- Searches by city, IANA identifier, IATA airport code, or common time-zone abbreviation.
+- Searches any city worldwide, plus IANA identifiers, IATA airport codes, and common time-zone abbreviations.
 - Resolves offsets from current IANA rules, including daylight-saving transitions.
 - Drag-to-reorder timezone rows with a synchronized timeline preview.
 - Finds the nearest meeting time with the best overlap.
@@ -150,7 +150,7 @@ The CI workflow runs formatting checks, shell syntax validation, tests, and an u
 
 ## Privacy
 
-Zonely has no analytics, accounts, or network service. Selected time zones are stored locally using macOS `UserDefaults`.
+Zonely has no analytics or accounts. Worldwide city searches use Apple's geocoding service; selected time zones are stored locally using macOS `UserDefaults`.
 
 ## License
 
