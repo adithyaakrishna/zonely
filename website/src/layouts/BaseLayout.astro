@@ -1,5 +1,4 @@
 ---
-import zonelyIcon from "../../../Assets/ZonelyAppIcon.png";
 import "../styles/global.css";
 
 interface Props {
@@ -8,6 +7,10 @@ interface Props {
 }
 
 const { title, description } = Astro.props;
+const siteUrl = Astro.site ?? new URL("https://zonely-three.vercel.app");
+const canonicalUrl = new URL(Astro.url.pathname, siteUrl).href;
+const ogImageUrl = new URL("/og.jpg", siteUrl).href;
+const ogTitle = "Zonely for macOS";
 ---
 
 <!doctype html>
@@ -17,11 +20,28 @@ const { title, description } = Astro.props;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
     <meta name="theme-color" content="#ffffff" />
-    <meta property="og:title" content="Zonely for macOS" />
+    <link rel="canonical" href={canonicalUrl} />
+
+    <meta property="og:title" content={ogTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Zonely showing meeting times across time zones" />
+    <meta property="og:site_name" content="Zonely" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={ogTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
+    <meta name="twitter:image:alt" content="Zonely showing meeting times across time zones" />
+
     <title>{title}</title>
-    <link rel="icon" type="image/png" href={zonelyIcon.src} />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   </head>
   <body>
     <slot />
