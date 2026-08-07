@@ -10,4 +10,4 @@ Allow: /
 User-agent: *
 Allow: /
 
-Sitemap: https://zonely.adikris.in/sitemap.xml
+Sitemap: https://zonely.adikris.in/sitemap-index.xml
