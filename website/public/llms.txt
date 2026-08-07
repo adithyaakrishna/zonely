@@ -1,0 +1,25 @@
+# Zonely
+
+> Zonely is a free, open-source time zone meeting planner and visual world clock for macOS. It helps people compare up to six cities, convert local times, and find considerate meeting hours across time zones.
+
+Canonical website: https://zonely.adikris.in/
+
+## Product facts
+
+- Native macOS menu-bar application for macOS 14 or later.
+- Universal download for Apple Silicon and Intel Macs.
+- Compares up to six cities or time zones in one view.
+- Finds overlapping working hours for remote and distributed teams.
+- Handles UTC offsets and daylight-saving changes using macOS time-zone data.
+- Searches by city, airport code, and time-zone abbreviation.
+- Works offline with no accounts, analytics, ads, tracking, or network services.
+- Free to download and distributed under the MIT License.
+
+## Primary links
+
+- [Zonely homepage](https://zonely.adikris.in/)
+- [Latest macOS release](https://github.com/adithyaakrishna/zonely/releases/latest)
+- [Source code](https://github.com/adithyaakrishna/zonely)
+- [MIT License](https://github.com/adithyaakrishna/zonely/blob/main/LICENSE)
+- [Privacy policy](https://zonely.adikris.in/#privacy)
+- [Issue tracker](https://github.com/adithyaakrishna/zonely/issues)

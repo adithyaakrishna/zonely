@@ -1,13 +1,24 @@
 ---
+import { existsSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+
 import zonelyIcon from "../../../Assets/ZonelyAppIcon.png";
 import BaseLayout from "../layouts/BaseLayout.astro";
 
 const description =
-  "A focused macOS menu-bar utility for finding humane meeting times across time zones.";
+  "Plan meetings across time zones from your Mac menu bar. Zonely compares up to six cities, finds humane overlap hours, handles DST, and works offline.";
+
+const demoWebmAvailable = existsSync(
+  fileURLToPath(new URL("../../public/zonely-demo.webm", import.meta.url)),
+);
+const demoMp4Available = existsSync(
+  fileURLToPath(new URL("../../public/zonely-demo.mp4", import.meta.url)),
+);
+const demoAvailable = demoWebmAvailable || demoMp4Available;
 ---
 
 <BaseLayout
-  title="Zonely — Humane meeting times across time zones"
+  title="Zonely — Time Zone Meeting Planner for Mac"
   description={description}
 >
   <main class="page-shell">
@@ -18,18 +29,26 @@ const description =
 
     <section class="demo" aria-label="Zonely app preview">
       <div class="demo__frame" data-demo-frame>
-        <video
-          class="demo__video"
-          data-demo-video
-          muted
-          loop
-          playsinline
-          preload="metadata"
-          aria-label="A screen recording of Zonely"
-        >
-          <source src="/zonely-demo.webm" type="video/webm" />
-          <source src="/zonely-demo.mp4" type="video/mp4" />
-        </video>
+        {
+          demoAvailable && (
+            <video
+              class="demo__video"
+              data-demo-video
+              muted
+              loop
+              playsinline
+              preload="metadata"
+              aria-label="Zonely comparing meeting times across multiple cities"
+            >
+              {demoWebmAvailable && (
+                <source src="/zonely-demo.webm" type="video/webm" />
+              )}
+              {demoMp4Available && (
+                <source src="/zonely-demo.mp4" type="video/mp4" />
+              )}
+            </video>
+          )
+        }
 
         <div class="demo__placeholder" aria-hidden="true">
           <img
@@ -41,20 +60,32 @@ const description =
           />
         </div>
 
-        <button
-          class="demo__control"
-          data-demo-control
-          type="button"
-          aria-label="Pause screen recording"
-          hidden
-        >
-          <svg class="demo__pause-icon" viewBox="0 0 16 16" aria-hidden="true">
-            <path d="M5.25 4v8M10.75 4v8"></path>
-          </svg>
-          <svg class="demo__play-icon" viewBox="0 0 16 16" aria-hidden="true">
-            <path d="m5.5 3.75 7 4.25-7 4.25z"></path>
-          </svg>
-        </button>
+        {
+          demoAvailable && (
+            <button
+              class="demo__control"
+              data-demo-control
+              type="button"
+              aria-label="Pause screen recording"
+              hidden
+            >
+              <svg
+                class="demo__pause-icon"
+                viewBox="0 0 16 16"
+                aria-hidden="true"
+              >
+                <path d="M5.25 4v8M10.75 4v8" />
+              </svg>
+              <svg
+                class="demo__play-icon"
+                viewBox="0 0 16 16"
+                aria-hidden="true"
+              >
+                <path d="m5.5 3.75 7 4.25-7 4.25z" />
+              </svg>
+            </button>
+          )
+        }
       </div>
     </section>
 
@@ -87,6 +118,93 @@ const description =
         <span>Star on GitHub</span>
       </a>
     </nav>
+
+    <section class="product-facts" aria-labelledby="product-facts-title">
+      <div class="product-facts__intro">
+        <h2 id="product-facts-title">A time zone meeting planner built for Mac</h2>
+        <p>
+          Zonely is a native, open-source visual world clock and meeting planner
+          for macOS 14 or later. It keeps global scheduling in the menu bar,
+          without accounts, tracking, or mental time-zone math.
+        </p>
+      </div>
+
+      <dl class="capability-list">
+        <div>
+          <dt>Compare up to six cities</dt>
+          <dd>
+            Search by city, airport code, or time-zone abbreviation and see
+            every local time together in one clear view.
+          </dd>
+        </div>
+        <div>
+          <dt>Find a humane meeting time</dt>
+          <dd>
+            See overlapping working hours and let Zonely identify the best
+            available time for your remote team.
+          </dd>
+        </div>
+        <div>
+          <dt>Stay accurate through DST</dt>
+          <dd>
+            Move across dates with UTC offsets and daylight-saving changes
+            calculated from macOS time-zone data.
+          </dd>
+        </div>
+      </dl>
+
+      <div class="quick-answers" aria-labelledby="quick-answers-title">
+        <h2 id="quick-answers-title">Quick answers about Zonely</h2>
+        <dl class="answer-list">
+          <div>
+            <dt>What is Zonely?</dt>
+            <dd>
+              Zonely is a native macOS menu-bar app for comparing time zones,
+              converting local times, and planning meetings across cities.
+            </dd>
+          </div>
+          <div>
+            <dt>Can Zonely find the best meeting time?</dt>
+            <dd>
+              Yes. It compares working hours across your selected cities and
+              highlights the most considerate available overlap.
+            </dd>
+          </div>
+          <div>
+            <dt>Does Zonely work offline?</dt>
+            <dd>
+              Yes. Zonely has no accounts, analytics, advertising, tracking, or
+              network services. Your selected time zones stay on your Mac.
+            </dd>
+          </div>
+          <div>
+            <dt>Does Zonely handle daylight saving time?</dt>
+            <dd>
+              Yes. It uses macOS time-zone data to apply UTC offsets and
+              daylight-saving changes for the date you select.
+            </dd>
+          </div>
+          <div>
+            <dt>Which Macs does Zonely support?</dt>
+            <dd>
+              Zonely supports macOS 14 or later and ships as a universal app for
+              Apple Silicon and Intel Macs.
+            </dd>
+          </div>
+          <div>
+            <dt>Is Zonely free and open source?</dt>
+            <dd>
+              Yes. You can <a href="https://github.com/adithyaakrishna/zonely/releases/latest"
+                >download Zonely for free</a
+              > or inspect its
+              <a href="https://github.com/adithyaakrishna/zonely"
+                >MIT-licensed source on GitHub</a
+              >.
+            </dd>
+          </div>
+        </dl>
+      </div>
+    </section>
 
     <footer class="site-footer">
       <span class="site-footer__made">

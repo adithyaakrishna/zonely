@@ -1,4 +1,5 @@
 ---
+import packageInfo from "../../package.json";
 import "../styles/global.css";
 
 interface Props {
@@ -7,10 +8,101 @@ interface Props {
 }
 
 const { title, description } = Astro.props;
-const siteUrl = Astro.site ?? new URL("https://zonely-three.vercel.app");
+const siteUrl = Astro.site ?? new URL("https://zonely.adikris.in");
+const rootUrl = new URL("/", siteUrl).href;
 const canonicalUrl = new URL(Astro.url.pathname, siteUrl).href;
 const ogImageUrl = new URL("/og.jpg", siteUrl).href;
-const ogTitle = "Zonely for macOS";
+const githubUrl = "https://github.com/adithyaakrishna/zonely";
+const latestReleaseUrl = `${githubUrl}/releases/latest`;
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Person",
+      "@id": `${rootUrl}#creator`,
+      name: "Adithya Krishna",
+      url: "https://github.com/adithyaakrishna",
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${rootUrl}#website`,
+      url: rootUrl,
+      name: "Zonely",
+      alternateName: ["/zonely", "Zonely for macOS"],
+      description,
+      inLanguage: "en",
+      creator: { "@id": `${rootUrl}#creator` },
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": `${rootUrl}#software`,
+      name: "Zonely",
+      alternateName: "Zonely for macOS",
+      description,
+      url: rootUrl,
+      image: {
+        "@type": "ImageObject",
+        url: ogImageUrl,
+        width: 1200,
+        height: 630,
+        caption: "Zonely comparing local working hours across four cities",
+      },
+      sameAs: [githubUrl],
+      applicationCategory: "UtilitiesApplication",
+      applicationSubCategory: "Time zone meeting planner",
+      operatingSystem: "macOS 14 or later",
+      softwareRequirements: "macOS 14 or later",
+      softwareVersion: packageInfo.version,
+      datePublished: "2026-08-07",
+      downloadUrl: latestReleaseUrl,
+      installUrl: latestReleaseUrl,
+      releaseNotes: `${githubUrl}/releases/tag/v${packageInfo.version}`,
+      isAccessibleForFree: true,
+      license: `${githubUrl}/blob/main/LICENSE`,
+      author: { "@id": `${rootUrl}#creator` },
+      offers: {
+        "@type": "Offer",
+        price: "0",
+        priceCurrency: "USD",
+        availability: "https://schema.org/InStock",
+        url: latestReleaseUrl,
+      },
+      featureList: [
+        "Compare up to six cities and time zones",
+        "Find overlapping working hours for global meetings",
+        "Convert local times across dates",
+        "Automatic daylight-saving time adjustments",
+        "Search by city, airport code, or time-zone abbreviation",
+        "Private, offline operation with no accounts or tracking",
+      ],
+      keywords: [
+        "macOS time zone meeting planner",
+        "Mac menu bar world clock",
+        "time zone converter for Mac",
+        "global meeting planner",
+        "remote team scheduling",
+        "daylight saving time converter",
+      ],
+    },
+    {
+      "@type": "WebPage",
+      "@id": `${canonicalUrl}#webpage`,
+      url: canonicalUrl,
+      name: title,
+      description,
+      isPartOf: { "@id": `${rootUrl}#website` },
+      about: { "@id": `${rootUrl}#software` },
+      mainEntity: { "@id": `${rootUrl}#software` },
+      primaryImageOfPage: {
+        "@type": "ImageObject",
+        url: ogImageUrl,
+        width: 1200,
+        height: 630,
+      },
+      inLanguage: "en",
+    },
+  ],
+};
 ---
 
 <!doctype html>
@@ -19,29 +111,39 @@ const ogTitle = "Zonely for macOS";
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
+    <meta name="author" content="Adithya Krishna" />
+    <meta name="application-name" content="Zonely" />
+    <meta
+      name="robots"
+      content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+    />
     <meta name="theme-color" content="#ffffff" />
     <link rel="canonical" href={canonicalUrl} />
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
 
-    <meta property="og:title" content={ogTitle} />
+    <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonicalUrl} />
     <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:secure_url" content={ogImageUrl} />
     <meta property="og:image:type" content="image/jpeg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="Zonely showing meeting times across time zones" />
     <meta property="og:site_name" content="Zonely" />
+    <meta property="og:locale" content="en_US" />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content={ogTitle} />
+    <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImageUrl} />
     <meta name="twitter:image:alt" content="Zonely showing meeting times across time zones" />
 
     <title>{title}</title>
-    <link rel="icon" type="image/png" href="/favicon.png" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <script type="application/ld+json" set:html={JSON.stringify(structuredData)}></script>
   </head>
   <body>
     <slot />
