@@ -26,6 +26,7 @@ Assets/ZonelyAppIcon-source.png
 node_modules/
 .astro/
 site-dist/
+.vercel/
 
 # Xcode per-user and derived state.
 xcuserdata/

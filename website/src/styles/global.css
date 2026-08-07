@@ -83,7 +83,7 @@ a {
 
 .demo__frame {
   position: relative;
-  aspect-ratio: 16 / 10;
+  aspect-ratio: 1280 / 752;
   overflow: hidden;
   border: 1px solid var(--border);
   border-radius: var(--radius-media);
@@ -92,39 +92,15 @@ a {
   isolation: isolate;
 }
 
-.demo__video,
-.demo__placeholder {
+.demo__video {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.demo__video {
   z-index: 1;
   display: block;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
   background: transparent;
-}
-
-.demo__placeholder {
-  z-index: 2;
-  display: grid;
-  place-items: center;
-  background: #fdfdfd;
-  transition: opacity 180ms ease;
-}
-
-.demo__placeholder img {
-  width: 72px;
-  height: 72px;
-  opacity: 0.92;
-  filter: saturate(0.82);
-}
-
-.demo__frame[data-ready="true"] .demo__placeholder {
-  pointer-events: none;
-  opacity: 0;
 }
 
 .demo__control {
@@ -676,11 +652,6 @@ body[data-drawer-open="true"] {
 
   .demo__frame {
     border-radius: 9px;
-  }
-
-  .demo__placeholder img {
-    width: 56px;
-    height: 56px;
   }
 
   .actions {
