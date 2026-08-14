@@ -202,7 +202,8 @@ struct MeetingStateTests {
     let defaults = try #require(UserDefaults(suiteName: suiteName))
     defer { defaults.removePersistentDomain(forName: suiteName) }
 
-    let model = MeetingViewModel(defaults: defaults)
+    let london = try #require(TimeZone(identifier: "Europe/London"))
+    let model = MeetingViewModel(defaults: defaults, timeZone: london)
     model.addTimeZone(
       TimeZoneOption(
         id: "Asia/Kolkata",
@@ -211,10 +212,64 @@ struct MeetingStateTests {
         utcOffsetMinutes: 330
       ))
 
-    let restoredModel = MeetingViewModel(defaults: defaults)
+    let restoredModel = MeetingViewModel(defaults: defaults, timeZone: london)
     let restoredPune = try #require(
       restoredModel.state.cities.first { $0.id == "Asia/Kolkata" })
     #expect(restoredPune.name == "Pune")
+  }
+
+  @Test func seededCitiesPutTheSystemTimeZoneFirst() throws {
+    let kolkata = try #require(TimeZone(identifier: "Asia/Kolkata"))
+    let seeded = MeetingState.seededCities(for: kolkata)
+
+    #expect(
+      seeded.map(\.id) == [
+        "Asia/Kolkata", "America/Los_Angeles", "America/New_York", "Europe/London",
+      ])
+    #expect(seeded.first?.name == "Kolkata")
+    #expect(seeded.map(\.colorIndex) == [0, 1, 2, 3])
+  }
+
+  @Test func seededCitiesDoNotDuplicateAMatchingDefault() throws {
+    let london = try #require(TimeZone(identifier: "Europe/London"))
+    let seeded = MeetingState.seededCities(for: london)
+
+    #expect(seeded.map(\.id) == ["Europe/London", "America/Los_Angeles", "America/New_York"])
+  }
+
+  @MainActor
+  @Test func launchSeedsTheSystemTimeZoneWhenNothingIsStored() throws {
+    let suiteName = "MeetingStateTests.\(UUID().uuidString)"
+    let defaults = try #require(UserDefaults(suiteName: suiteName))
+    defer { defaults.removePersistentDomain(forName: suiteName) }
+    let kolkata = try #require(TimeZone(identifier: "Asia/Kolkata"))
+
+    let model = MeetingViewModel(defaults: defaults, timeZone: kolkata)
+
+    #expect(model.state.cities.first?.id == "Asia/Kolkata")
+    #expect(!model.state.cities.contains { $0.id == "America/Sao_Paulo" })
+  }
+
+  @MainActor
+  @Test func storedCitiesWinOverSeeding() throws {
+    let suiteName = "MeetingStateTests.\(UUID().uuidString)"
+    let defaults = try #require(UserDefaults(suiteName: suiteName))
+    defer { defaults.removePersistentDomain(forName: suiteName) }
+    let kolkata = try #require(TimeZone(identifier: "Asia/Kolkata"))
+    let sydney = try #require(TimeZone(identifier: "Australia/Sydney"))
+
+    let model = MeetingViewModel(defaults: defaults, timeZone: kolkata)
+    model.addTimeZone(
+      TimeZoneOption(
+        id: "America/Sao_Paulo",
+        cityName: "São Paulo",
+        detail: "Brazil",
+        utcOffsetMinutes: -180
+      ))
+
+    let restoredModel = MeetingViewModel(defaults: defaults, timeZone: sydney)
+    #expect(restoredModel.state.cities.first?.id == "Asia/Kolkata")
+    #expect(!restoredModel.state.cities.contains { $0.id == "Australia/Sydney" })
   }
 
   @Test func timeZoneListAllowsNoMoreThanSixUniqueCities() {

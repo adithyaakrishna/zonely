@@ -156,6 +156,24 @@ struct MeetingState: Equatable, Sendable {
     City(id: "Europe/London", name: "London", utcOffsetMinutes: 60, colorIndex: 3),
   ]
 
+  static func seededCities(for timeZone: TimeZone) -> [City] {
+    guard let localCity = City.timeZone(identifier: timeZone.identifier, colorIndex: 0) else {
+      return defaultCities
+    }
+    let fallbackCities = defaultCities.filter {
+      $0.id != "America/Sao_Paulo" && $0.id != localCity.id
+    }
+    let reindexedCities = fallbackCities.enumerated().map { index, city in
+      City(
+        id: city.id,
+        name: city.name,
+        utcOffsetMinutes: city.utcOffsetMinutes,
+        colorIndex: index + 1
+      )
+    }
+    return [localCity] + reindexedCities
+  }
+
   var selectedUTCHour: Int = 5
   var cities: [City] = Self.defaultCities
   var referenceDate: Date = Date()
@@ -264,9 +282,10 @@ final class MeetingViewModel: ObservableObject {
   private static let storedTimeZonesKey = "selectedTimeZoneIdentifiers"
   private static let storedCitiesKey = "selectedCities"
 
-  init(defaults: UserDefaults = .standard) {
+  init(defaults: UserDefaults = .standard, timeZone: TimeZone = .autoupdatingCurrent) {
     self.defaults = defaults
     var state = MeetingState()
+    state.cities = MeetingState.seededCities(for: timeZone)
 
     if let storedCities = Self.decodeStoredCities(from: defaults.data(forKey: Self.storedCitiesKey))
     {
