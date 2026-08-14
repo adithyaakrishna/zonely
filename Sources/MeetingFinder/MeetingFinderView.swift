@@ -190,10 +190,7 @@ struct MeetingFinderView: View {
 
   private var selectedTimeLabels: some View {
     VStack(alignment: .leading, spacing: 0) {
-      Text("UTC")
-        .font(.system(size: 10.5, weight: .regular, design: .monospaced))
-        .foregroundStyle(Color.black.opacity(0.42))
-        .frame(height: 24, alignment: .topLeading)
+      Color.clear.frame(height: 24)
 
       ForEach(Array(model.state.cities.enumerated()), id: \.element.id) { index, city in
         let time = city.localTime(
