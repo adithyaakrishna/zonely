@@ -272,6 +272,33 @@ struct MeetingStateTests {
     #expect(!restoredModel.state.cities.contains { $0.id == "Australia/Sydney" })
   }
 
+  @Test func utcHourMatchesTheClockHourOfTheMoment() {
+    #expect(MeetingState.utcHour(at: Self.summerAfternoon) == 14)
+    #expect(MeetingState.utcHour(at: Self.summer) == 0)
+  }
+
+  @MainActor
+  @Test func launchSelectsTheCurrentUTCHour() throws {
+    let suiteName = "MeetingStateTests.\(UUID().uuidString)"
+    let defaults = try #require(UserDefaults(suiteName: suiteName))
+    defer { defaults.removePersistentDomain(forName: suiteName) }
+
+    let model = MeetingViewModel(defaults: defaults, now: Self.summerAfternoon)
+    #expect(model.state.selectedUTCHour == 14)
+  }
+
+  @MainActor
+  @Test func openingThePanelMovesSelectionToTheCurrentUTCHour() throws {
+    let suiteName = "MeetingStateTests.\(UUID().uuidString)"
+    let defaults = try #require(UserDefaults(suiteName: suiteName))
+    defer { defaults.removePersistentDomain(forName: suiteName) }
+
+    let model = MeetingViewModel(defaults: defaults, now: Self.summer)
+    model.select(hour: 5)
+    model.selectCurrentTime(at: Self.summerAfternoon)
+    #expect(model.state.selectedUTCHour == 14)
+  }
+
   @Test func timeZoneListAllowsNoMoreThanSixUniqueCities() {
     var state = MeetingState()
     let kolkata = TimeZoneOption(
@@ -382,5 +409,7 @@ struct MeetingStateTests {
   }
 
   private static let summer = ISO8601DateFormatter().date(from: "2026-07-15T00:00:00Z")!
+  private static let summerAfternoon = ISO8601DateFormatter().date(
+    from: "2026-07-15T14:37:22Z")!
   private static let utc = TimeZone(secondsFromGMT: 0)!
 }

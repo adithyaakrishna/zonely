@@ -1,6 +1,12 @@
 import Foundation
 import SwiftUI
 
+private let utcCalendar: Calendar = {
+  var calendar = Calendar(identifier: .gregorian)
+  calendar.timeZone = TimeZone(secondsFromGMT: 0) ?? .gmt
+  return calendar
+}()
+
 struct City: Identifiable, Equatable, Sendable {
   let id: String
   let name: String
@@ -99,12 +105,6 @@ struct City: Identifiable, Equatable, Sendable {
     return utcCalendar.date(byAdding: .hour, value: hour, to: startOfDay) ?? date
   }
 
-  private static let utcCalendar: Calendar = {
-    var calendar = Calendar(identifier: .gregorian)
-    calendar.timeZone = TimeZone(secondsFromGMT: 0) ?? .gmt
-    return calendar
-  }()
-
   private static let palette: [Color] = [
     Color(red: 0.16, green: 0.45, blue: 0.94),
     Color(red: 0.47, green: 0.17, blue: 0.95),
@@ -177,6 +177,10 @@ struct MeetingState: Equatable, Sendable {
   var selectedUTCHour: Int = 5
   var cities: [City] = Self.defaultCities
   var referenceDate: Date = Date()
+
+  static func utcHour(at date: Date) -> Int {
+    utcCalendar.component(.hour, from: date)
+  }
 
   var selectedTimes: [(city: City, time: LocalTime)] {
     cities.map { ($0, $0.localTime(at: selectedUTCHour, on: referenceDate)) }
@@ -282,9 +286,14 @@ final class MeetingViewModel: ObservableObject {
   private static let storedTimeZonesKey = "selectedTimeZoneIdentifiers"
   private static let storedCitiesKey = "selectedCities"
 
-  init(defaults: UserDefaults = .standard, timeZone: TimeZone = .autoupdatingCurrent) {
+  init(
+    defaults: UserDefaults = .standard,
+    now: Date = Date(),
+    timeZone: TimeZone = .autoupdatingCurrent
+  ) {
     self.defaults = defaults
     var state = MeetingState()
+    state.selectedUTCHour = MeetingState.utcHour(at: now)
     state.cities = MeetingState.seededCities(for: timeZone)
 
     if let storedCities = Self.decodeStoredCities(from: defaults.data(forKey: Self.storedCitiesKey))
@@ -314,6 +323,10 @@ final class MeetingViewModel: ObservableObject {
 
   func select(hour: Int) {
     state.selectedUTCHour = min(max(hour, 0), 23)
+  }
+
+  func selectCurrentTime(at date: Date = Date()) {
+    select(hour: MeetingState.utcHour(at: date))
   }
 
   func findBestTime() {

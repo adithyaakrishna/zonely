@@ -38,6 +38,7 @@ final class MenuBarController: NSObject {
   func showPanel() {
     NotificationCenter.default.post(name: .hideTimeZonePicker, object: nil)
     model.refreshTimeZoneRules()
+    model.selectCurrentTime()
     let button = statusItem.button
     let buttonWindow = button?.window
     let menuBarScreen = NSScreen.screens.first { screen in
@@ -155,7 +156,7 @@ final class MenuBarController: NSObject {
     menu.addItem(openItem)
     menu.addItem(.separator())
     let resetItem = NSMenuItem(
-      title: "Reset to 05:00 UTC", action: #selector(resetSelection), keyEquivalent: "")
+      title: "Reset to current time", action: #selector(resetSelection), keyEquivalent: "")
     resetItem.target = self
     menu.addItem(resetItem)
     menu.addItem(.separator())
@@ -174,7 +175,7 @@ final class MenuBarController: NSObject {
 
   @objc private func resetSelection() {
     withAnimation(.spring(response: 0.4, dampingFraction: 0.82)) {
-      model.select(hour: 5)
+      model.selectCurrentTime()
     }
   }
 
