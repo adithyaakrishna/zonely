@@ -71,6 +71,100 @@ struct PanelResizeConfiguration {
   let animates: Bool
 }
 
+struct SelectedTimeChipPresentation: Equatable {
+  let localLabel: String
+  let utcLabel: String
+
+  static func make(
+    utcHour: Int,
+    referenceDate: Date,
+    timeZone: TimeZone,
+    locale: Locale
+  ) -> SelectedTimeChipPresentation {
+    var utcCalendar = Calendar(identifier: .gregorian)
+    utcCalendar.timeZone = TimeZone(secondsFromGMT: 0) ?? .gmt
+    let startOfDay = utcCalendar.startOfDay(for: referenceDate)
+    let selectedMoment =
+      utcCalendar.date(byAdding: .hour, value: utcHour, to: startOfDay) ?? referenceDate
+
+    var localCalendar = Calendar(identifier: .gregorian)
+    localCalendar.timeZone = timeZone
+    let components = localCalendar.dateComponents([.hour, .minute], from: selectedMoment)
+    let hour = components.hour ?? 0
+    let minute = components.minute ?? 0
+    let timeZoneName = shortName(for: timeZone, at: selectedMoment, locale: locale)
+
+    return SelectedTimeChipPresentation(
+      localLabel: String(format: "%02d:%02d %@", hour, minute, timeZoneName),
+      utcLabel: String(format: "%02d:00 UTC", utcHour)
+    )
+  }
+
+  func label(showingUTC: Bool) -> String {
+    showingUTC ? utcLabel : localLabel
+  }
+
+  private static func shortName(for timeZone: TimeZone, at date: Date, locale: Locale) -> String {
+    let abbreviations = TimeZone.abbreviationDictionary
+      .filter { $0.value == timeZone.identifier }
+      .map(\.key)
+      .sorted()
+    let isDaylightSaving = timeZone.isDaylightSavingTime(for: date)
+    let preferredAbbreviation =
+      abbreviations.first { abbreviation in
+        isDaylightSaving ? abbreviation.contains("D") : !abbreviation.contains("D")
+      } ?? abbreviations.first
+
+    if let preferredAbbreviation {
+      return preferredAbbreviation
+    }
+
+    let nameStyle: TimeZone.NameStyle =
+      isDaylightSaving ? .shortDaylightSaving : .shortStandard
+    if let localizedName = timeZone.localizedName(for: nameStyle, locale: locale),
+      !localizedName.hasPrefix("GMT"),
+      !localizedName.hasPrefix("UTC")
+    {
+      return localizedName
+    }
+
+    return "Local"
+  }
+}
+
+private struct SelectedTimeChip: View {
+  let utcHour: Int
+  let referenceDate: Date
+  @State private var isShowingUTC = false
+  @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+  private var presentation: SelectedTimeChipPresentation {
+    SelectedTimeChipPresentation.make(
+      utcHour: utcHour,
+      referenceDate: referenceDate,
+      timeZone: .autoupdatingCurrent,
+      locale: .current
+    )
+  }
+
+  var body: some View {
+    Text(presentation.label(showingUTC: isShowingUTC))
+      .font(.system(size: 12.5, weight: .regular, design: .monospaced))
+      .foregroundStyle(Theme.chipText)
+      .lineLimit(1)
+      .frame(width: 84)
+      .padding(.horizontal, 12)
+      .frame(height: 28)
+      .background(Theme.chipFill, in: Capsule())
+      .contentTransition(.opacity)
+      .animation(reduceMotion ? nil : .easeOut(duration: 0.12), value: isShowingUTC)
+      .onHover { isShowingUTC = $0 }
+      .accessibilityElement(children: .ignore)
+      .accessibilityLabel("Selected time")
+      .accessibilityValue("\(presentation.localLabel), \(presentation.utcLabel)")
+  }
+}
+
 struct MeetingFinderView: View {
   @ObservedObject var model: MeetingViewModel
   @State private var isShowingTimeZonePicker: Bool
@@ -138,13 +232,10 @@ struct MeetingFinderView: View {
 
       Spacer()
 
-      Text(String(format: "%02d:00 UTC", model.state.selectedUTCHour))
-        .font(.system(size: 12.5, weight: .regular, design: .monospaced))
-        .foregroundStyle(Theme.chipText)
-        .padding(.horizontal, 12)
-        .frame(height: 28)
-        .background(Theme.chipFill, in: Capsule())
-        .contentTransition(.numericText())
+      SelectedTimeChip(
+        utcHour: model.state.selectedUTCHour,
+        referenceDate: model.state.referenceDate
+      )
     }
     .padding(.horizontal, 24)
     .padding(.top, 2)

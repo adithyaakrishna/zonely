@@ -337,6 +337,29 @@ struct MeetingStateTests {
     #expect(Theme.selectorInnerBorderWidth(for: .dark) == 0.25)
   }
 
+  @Test func selectedTimeChipShowsLocalTimeAndUTCOnHover() throws {
+    let kolkata = try #require(TimeZone(identifier: "Asia/Kolkata"))
+    let kolkataPresentation = SelectedTimeChipPresentation.make(
+      utcHour: 18,
+      referenceDate: Self.summer,
+      timeZone: kolkata,
+      locale: Locale(identifier: "en_US")
+    )
+    #expect(kolkataPresentation.localLabel == "23:30 IST")
+    #expect(kolkataPresentation.utcLabel == "18:00 UTC")
+    #expect(kolkataPresentation.label(showingUTC: false) == "23:30 IST")
+    #expect(kolkataPresentation.label(showingUTC: true) == "18:00 UTC")
+
+    let newYork = try #require(TimeZone(identifier: "America/New_York"))
+    let newYorkPresentation = SelectedTimeChipPresentation.make(
+      utcHour: 18,
+      referenceDate: Self.summer,
+      timeZone: newYork,
+      locale: Locale(identifier: "en_US")
+    )
+    #expect(newYorkPresentation.localLabel == "14:00 EDT")
+  }
+
   @Test func utcHourMatchesTheClockHourOfTheMoment() {
     #expect(MeetingState.utcHour(at: Self.summerAfternoon) == 14)
     #expect(MeetingState.utcHour(at: Self.summer) == 0)
