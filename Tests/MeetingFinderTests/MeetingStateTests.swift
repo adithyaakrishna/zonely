@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import Testing
 
@@ -270,6 +271,31 @@ struct MeetingStateTests {
     let restoredModel = MeetingViewModel(defaults: defaults, timeZone: sydney)
     #expect(restoredModel.state.cities.first?.id == "Asia/Kolkata")
     #expect(!restoredModel.state.cities.contains { $0.id == "Australia/Sydney" })
+  }
+
+  @MainActor
+  @Test func themeColorsResolveDifferentlyPerAppearance() throws {
+    let lightAppearance = try #require(NSAppearance(named: .aqua))
+    let darkAppearance = try #require(NSAppearance(named: .darkAqua))
+    let dynamicColor = Theme.dynamicNSColor(
+      light: NSColor(red: 0.935, green: 0.935, blue: 0.94, alpha: 1),
+      dark: NSColor(red: 0.13, green: 0.13, blue: 0.14, alpha: 1)
+    )
+
+    var lightResolved: NSColor?
+    lightAppearance.performAsCurrentDrawingAppearance {
+      lightResolved = dynamicColor.usingColorSpace(.sRGB)
+    }
+    var darkResolved: NSColor?
+    darkAppearance.performAsCurrentDrawingAppearance {
+      darkResolved = dynamicColor.usingColorSpace(.sRGB)
+    }
+
+    let light = try #require(lightResolved)
+    let dark = try #require(darkResolved)
+    #expect(light != dark)
+    #expect(abs(light.redComponent - 0.935) < 0.01)
+    #expect(abs(dark.redComponent - 0.13) < 0.01)
   }
 
   @Test func utcHourMatchesTheClockHourOfTheMoment() {

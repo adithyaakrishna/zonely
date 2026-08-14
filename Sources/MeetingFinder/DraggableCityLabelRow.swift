@@ -99,7 +99,7 @@ struct DraggableCityLabelRow: View {
           }
         }
       }
-      .foregroundStyle(Color.black.opacity(gripOpacity))
+      .foregroundStyle(Theme.grip.opacity(gripOpacity))
       .frame(width: 14, height: 23)
       .contentShape(Rectangle())
       .gesture(reorderGesture)
@@ -134,11 +134,11 @@ struct DraggableCityLabelRow: View {
       VStack(alignment: .leading, spacing: 1) {
         Text(city.name)
           .font(.system(size: 13, weight: .medium, design: .rounded))
-          .foregroundStyle(Color(red: 0.12, green: 0.12, blue: 0.13))
+          .foregroundStyle(Theme.textBody)
           .lineLimit(1)
         Text(city.offsetLabel)
           .font(.system(size: 10.5, weight: .regular, design: .rounded))
-          .foregroundStyle(Color.black.opacity(0.40))
+          .foregroundStyle(Theme.textOffset)
       }
     }
     .frame(height: rowHeight, alignment: .topLeading)
