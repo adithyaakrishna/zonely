@@ -1,4 +1,5 @@
 import AppKit
+import Combine
 import Foundation
 import Testing
 
@@ -443,6 +444,42 @@ struct MeetingStateTests {
     #expect(resize.frame.maxY == original.maxY)
     #expect(resize.frame.size == MeetingFinderLayout.panelSize(for: 6))
     #expect(!resize.animates)
+  }
+
+  @MainActor
+  @Test func panelResizeRunsAfterPublishedTimeZoneStateCommits() async throws {
+    let suiteName = "MeetingStateTests.\(UUID().uuidString)"
+    let defaults = try #require(UserDefaults(suiteName: suiteName))
+    defer { defaults.removePersistentDomain(forName: suiteName) }
+    let utc = try #require(TimeZone(secondsFromGMT: 0))
+    let model = MeetingViewModel(defaults: defaults, timeZone: utc)
+    let originalCount = model.state.cities.count
+    var subscription: AnyCancellable?
+
+    let observedCounts = await withCheckedContinuation { continuation in
+      subscription = model.$state
+        .map { $0.cities.count }
+        .removeDuplicates()
+        .dropFirst()
+        .sink { publishedCount in
+          PanelResizeScheduler.afterStateCommit {
+            continuation.resume(
+              returning: (published: publishedCount, committed: model.state.cities.count))
+          }
+        }
+
+      model.addTimeZone(
+        TimeZoneOption(
+          id: "Asia/Tokyo",
+          cityName: "Tokyo",
+          detail: "Japan Standard Time",
+          utcOffsetMinutes: 540
+        ))
+    }
+    withExtendedLifetime(subscription) {}
+
+    #expect(observedCounts.published == originalCount + 1)
+    #expect(observedCounts.committed == observedCounts.published)
   }
 
   @Test func atLeastOneTimeZoneMustRemain() {

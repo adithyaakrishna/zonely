@@ -2,6 +2,16 @@ import AppKit
 import Combine
 import SwiftUI
 
+enum PanelResizeScheduler {
+  @MainActor
+  static func afterStateCommit(_ action: @escaping @MainActor () -> Void) {
+    Task { @MainActor in
+      await Task.yield()
+      action()
+    }
+  }
+}
+
 @MainActor
 final class MenuBarController: NSObject {
   private let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
@@ -126,7 +136,9 @@ final class MenuBarController: NSObject {
       .removeDuplicates()
       .dropFirst()
       .sink { [weak self] cityCount in
-        self?.resizePanel(for: cityCount)
+        PanelResizeScheduler.afterStateCommit { [weak self] in
+          self?.resizePanel(for: cityCount)
+        }
       }
   }
 
