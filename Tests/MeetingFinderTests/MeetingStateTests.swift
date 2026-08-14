@@ -296,6 +296,45 @@ struct MeetingStateTests {
     #expect(light != dark)
     #expect(abs(light.redComponent - 0.935) < 0.01)
     #expect(abs(dark.redComponent - 0.13) < 0.01)
+
+    func resolvedCityColor(at index: Int, appearance: NSAppearance) throws -> NSColor {
+      let city = City(
+        id: "Test/City/\(index)",
+        name: "Test City \(index)",
+        utcOffsetMinutes: 0,
+        colorIndex: index
+      )
+      var resolved: NSColor?
+      appearance.performAsCurrentDrawingAppearance {
+        resolved = NSColor(city.color).usingColorSpace(.sRGB)
+      }
+      return try #require(resolved)
+    }
+
+    let expectedPalette: [(red: CGFloat, green: CGFloat, blue: CGFloat)] = [
+      (0.16, 0.45, 0.94),
+      (0.47, 0.17, 0.95),
+      (0.94, 0.00, 0.31),
+      (0.96, 0.51, 0.00),
+      (0.00, 0.62, 0.58),
+      (0.42, 0.67, 0.08),
+    ]
+
+    for (index, expected) in expectedPalette.enumerated() {
+      let lightCityColor = try resolvedCityColor(at: index, appearance: lightAppearance)
+      let darkCityColor = try resolvedCityColor(at: index, appearance: darkAppearance)
+
+      for resolved in [lightCityColor, darkCityColor] {
+        #expect(abs(resolved.redComponent - expected.red) < 0.01)
+        #expect(abs(resolved.greenComponent - expected.green) < 0.01)
+        #expect(abs(resolved.blueComponent - expected.blue) < 0.01)
+      }
+    }
+
+    #expect(Theme.selectorOuterBorderWidth(for: .light) == 1.25)
+    #expect(Theme.selectorInnerBorderWidth(for: .light) == 0.45)
+    #expect(Theme.selectorOuterBorderWidth(for: .dark) == 0.8)
+    #expect(Theme.selectorInnerBorderWidth(for: .dark) == 0.25)
   }
 
   @Test func utcHourMatchesTheClockHourOfTheMoment() {

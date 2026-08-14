@@ -22,7 +22,7 @@ enum Theme {
   static let buttonText = color(light: white(1), dark: rgb(0.08, 0.08, 0.09))
   static let grip = color(light: black(1), dark: white(1))
 
-  static let cellOff = color(light: black(0.055), dark: white(0.085))
+  static let cellOff = color(light: black(0.055), dark: white(0.12))
   static let indicatorOff = color(light: rgb(0.10, 0.10, 0.11), dark: rgb(0.85, 0.85, 0.88))
   static let handleFallback = color(light: rgb(0.08, 0.08, 0.09), dark: rgb(0.88, 0.88, 0.90))
   static let dotOff = color(light: black(0.14), dark: white(0.22))
@@ -38,6 +38,14 @@ enum Theme {
     NSColor(name: nil) { appearance in
       appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua ? dark : light
     }
+  }
+
+  static func selectorOuterBorderWidth(for colorScheme: ColorScheme) -> CGFloat {
+    colorScheme == .dark ? 0.8 : 1.25
+  }
+
+  static func selectorInnerBorderWidth(for colorScheme: ColorScheme) -> CGFloat {
+    colorScheme == .dark ? 0.25 : 0.45
   }
 
   private static func color(light: NSColor, dark: NSColor) -> Color {

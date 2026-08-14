@@ -310,6 +310,7 @@ private struct TimelineGrid: View {
   @State private var dragPositionX: CGFloat?
   @State private var isPointerInsideGrid = false
   @Environment(\.accessibilityReduceMotion) private var reduceMotion
+  @Environment(\.colorScheme) private var colorScheme
 
   private let labelHeight = TimelineMetrics.labelHeight
   private let cellGap = TimelineMetrics.hourGap
@@ -465,6 +466,8 @@ private struct TimelineGrid: View {
   @ViewBuilder
   private func selectorGlassSurface(height: CGFloat) -> some View {
     let shape = RoundedRectangle(cornerRadius: 7.5, style: .continuous)
+    let outerBorderWidth = Theme.selectorOuterBorderWidth(for: colorScheme)
+    let innerBorderWidth = Theme.selectorInnerBorderWidth(for: colorScheme)
 
     if #available(macOS 26.0, *) {
       ZStack {
@@ -481,8 +484,10 @@ private struct TimelineGrid: View {
         )
       }
       .glassEffect(.clear.interactive(), in: shape)
-      .overlay(shape.stroke(indicatorGradient.opacity(0.72), lineWidth: 1.25))
-      .overlay(shape.inset(by: 1.1).stroke(Color.white.opacity(0.36), lineWidth: 0.45))
+      .overlay(shape.stroke(indicatorGradient.opacity(0.72), lineWidth: outerBorderWidth))
+      .overlay(
+        shape.inset(by: 1.1).stroke(Color.white.opacity(0.36), lineWidth: innerBorderWidth)
+      )
       .frame(width: cellWidth + 7, height: height)
     } else {
       ZStack {
@@ -498,8 +503,10 @@ private struct TimelineGrid: View {
           )
         )
       }
-      .overlay(shape.stroke(indicatorGradient.opacity(0.72), lineWidth: 1.25))
-      .overlay(shape.inset(by: 1.1).stroke(Color.white.opacity(0.36), lineWidth: 0.45))
+      .overlay(shape.stroke(indicatorGradient.opacity(0.72), lineWidth: outerBorderWidth))
+      .overlay(
+        shape.inset(by: 1.1).stroke(Color.white.opacity(0.36), lineWidth: innerBorderWidth)
+      )
       .frame(width: cellWidth + 7, height: height)
     }
   }
