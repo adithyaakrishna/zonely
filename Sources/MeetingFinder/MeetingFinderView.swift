@@ -97,16 +97,15 @@ struct MeetingFinderView: View {
         .frame(height: MeetingFinderLayout.footerHeight)
     }
     .frame(width: cardSize.width, height: cardSize.height)
-    .background(Color(red: 0.935, green: 0.935, blue: 0.94))
+    .background(Theme.panelBackground)
     .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
     .overlay {
       RoundedRectangle(cornerRadius: 28, style: .continuous)
-        .strokeBorder(Color.black.opacity(0.032), lineWidth: 0.5)
+        .strokeBorder(Theme.panelBorder, lineWidth: 0.5)
     }
     .shadow(color: Color.black.opacity(0.035), radius: 2, x: 0, y: 1)
     .shadow(color: Color.black.opacity(0.085), radius: 16, x: 0, y: 8)
     .animation(.easeInOut(duration: 0.2), value: cityCount)
-    .environment(\.colorScheme, .light)
     .onReceive(NotificationCenter.default.publisher(for: .showTimeZonePicker)) { _ in
       isShowingTimeZonePicker = true
     }
@@ -119,16 +118,16 @@ struct MeetingFinderView: View {
     HStack {
       Text("Zonely")
         .font(.system(size: 17, weight: .semibold, design: .rounded))
-        .foregroundStyle(Color(red: 0.07, green: 0.07, blue: 0.08))
+        .foregroundStyle(Theme.textTitle)
 
       Button {
         isShowingTimeZonePicker.toggle()
       } label: {
         Image(systemName: "plus")
           .font(.system(size: 10, weight: .bold))
-          .foregroundStyle(Color.black.opacity(0.62))
+          .foregroundStyle(Theme.controlIcon)
           .frame(width: 23, height: 23)
-          .background(Color.white.opacity(0.72), in: Circle())
+          .background(Theme.controlBackground, in: Circle())
       }
       .buttonStyle(.plain)
       .help("Add or remove time zones")
@@ -141,10 +140,10 @@ struct MeetingFinderView: View {
 
       Text(String(format: "%02d:00 UTC", model.state.selectedUTCHour))
         .font(.system(size: 12.5, weight: .regular, design: .monospaced))
-        .foregroundStyle(Color(red: 0.27, green: 0.27, blue: 0.31))
+        .foregroundStyle(Theme.chipText)
         .padding(.horizontal, 12)
         .frame(height: 28)
-        .background(Color.black.opacity(0.045), in: Capsule())
+        .background(Theme.chipFill, in: Capsule())
         .contentTransition(.numericText())
     }
     .padding(.horizontal, 24)
@@ -168,7 +167,7 @@ struct MeetingFinderView: View {
     .padding(.horizontal, 9)
     .padding(.vertical, 14)
     .frame(height: TimelineMetrics.cardHeight(for: model.state.cities.count))
-    .background(Color.white.opacity(0.96))
+    .background(Theme.cardBackground)
     .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
   }
 
@@ -200,14 +199,14 @@ struct MeetingFinderView: View {
         HStack(alignment: .firstTextBaseline, spacing: 4) {
           Text(time.label)
             .font(.system(size: 12.5, weight: .regular, design: .monospaced))
-            .foregroundStyle(time.isWorkingHour ? city.color : Color.black.opacity(0.46))
+            .foregroundStyle(time.isWorkingHour ? city.color : Theme.textTime)
             .lineLimit(1)
             .fixedSize(horizontal: true, vertical: false)
             .contentTransition(.numericText())
           if let dayLabel = time.dayLabel {
             Text(dayLabel)
               .font(.system(size: 9, weight: .regular, design: .monospaced))
-              .foregroundStyle(Color.black.opacity(0.36))
+              .foregroundStyle(Theme.textDayBadge)
               .lineLimit(1)
               .fixedSize(horizontal: true, vertical: false)
           }
@@ -254,7 +253,7 @@ struct MeetingFinderView: View {
         Circle()
           .fill(
             model.state.worksForEveryone
-              ? Color(red: 0.18, green: 0.79, blue: 0.49) : Color.black.opacity(0.14)
+              ? Color(red: 0.18, green: 0.79, blue: 0.49) : Theme.dotOff
           )
           .frame(width: 7, height: 7)
 
@@ -262,7 +261,7 @@ struct MeetingFinderView: View {
           .font(.system(size: 12.5, weight: .medium, design: .rounded))
           .foregroundStyle(
             model.state.worksForEveryone
-              ? Color(red: 0.02, green: 0.52, blue: 0.30) : Color.black.opacity(0.57)
+              ? Theme.successText : Theme.textSecondary
           )
           .contentTransition(.numericText())
       }
@@ -270,7 +269,7 @@ struct MeetingFinderView: View {
       .frame(height: 30)
       .background {
         if model.state.worksForEveryone {
-          Capsule().fill(Color(red: 0.91, green: 1.0, blue: 0.95))
+          Capsule().fill(Theme.successFill)
         }
       }
 
@@ -287,10 +286,10 @@ struct MeetingFinderView: View {
           Text("Find best time")
             .font(.system(size: 12, weight: .medium, design: .rounded))
         }
-        .foregroundStyle(.white)
+        .foregroundStyle(Theme.buttonText)
         .padding(.horizontal, 13)
         .frame(height: 30)
-        .background(Color(red: 0.06, green: 0.06, blue: 0.07), in: Capsule())
+        .background(Theme.buttonFill, in: Capsule())
       }
       .buttonStyle(.plain)
       .accessibilityHint("Selects the time that is within working hours in every city")
@@ -311,6 +310,7 @@ private struct TimelineGrid: View {
   @State private var dragPositionX: CGFloat?
   @State private var isPointerInsideGrid = false
   @Environment(\.accessibilityReduceMotion) private var reduceMotion
+  @Environment(\.colorScheme) private var colorScheme
 
   private let labelHeight = TimelineMetrics.labelHeight
   private let cellGap = TimelineMetrics.hourGap
@@ -382,7 +382,7 @@ private struct TimelineGrid: View {
       ForEach([0, 6, 12, 18], id: \.self) { hour in
         Text(String(format: "%02d", hour))
           .font(.system(size: 10.5, weight: .regular, design: .monospaced))
-          .foregroundStyle(Color.black.opacity(0.42))
+          .foregroundStyle(Theme.textHourAxis)
           .position(x: xCenter(for: hour), y: 6)
       }
     }
@@ -434,7 +434,7 @@ private struct TimelineGrid: View {
 
     switch model.state.availability(for: city, utcHour: hour) {
     case .off:
-      return Color.black.opacity(0.055)
+      return Theme.cellOff
     case .edge:
       return city.color.opacity(isElapsedSuccessHour ? 0.18 : 0.30)
     case .working:
@@ -466,6 +466,8 @@ private struct TimelineGrid: View {
   @ViewBuilder
   private func selectorGlassSurface(height: CGFloat) -> some View {
     let shape = RoundedRectangle(cornerRadius: 7.5, style: .continuous)
+    let outerBorderWidth = Theme.selectorOuterBorderWidth(for: colorScheme)
+    let innerBorderWidth = Theme.selectorInnerBorderWidth(for: colorScheme)
 
     if #available(macOS 26.0, *) {
       ZStack {
@@ -482,8 +484,10 @@ private struct TimelineGrid: View {
         )
       }
       .glassEffect(.clear.interactive(), in: shape)
-      .overlay(shape.stroke(indicatorGradient.opacity(0.72), lineWidth: 1.25))
-      .overlay(shape.inset(by: 1.1).stroke(Color.white.opacity(0.36), lineWidth: 0.45))
+      .overlay(shape.stroke(indicatorGradient.opacity(0.72), lineWidth: outerBorderWidth))
+      .overlay(
+        shape.inset(by: 1.1).stroke(Color.white.opacity(0.36), lineWidth: innerBorderWidth)
+      )
       .frame(width: cellWidth + 7, height: height)
     } else {
       ZStack {
@@ -499,8 +503,10 @@ private struct TimelineGrid: View {
           )
         )
       }
-      .overlay(shape.stroke(indicatorGradient.opacity(0.72), lineWidth: 1.25))
-      .overlay(shape.inset(by: 1.1).stroke(Color.white.opacity(0.36), lineWidth: 0.45))
+      .overlay(shape.stroke(indicatorGradient.opacity(0.72), lineWidth: outerBorderWidth))
+      .overlay(
+        shape.inset(by: 1.1).stroke(Color.white.opacity(0.36), lineWidth: innerBorderWidth)
+      )
       .frame(width: cellWidth + 7, height: height)
     }
   }
@@ -526,7 +532,7 @@ private struct TimelineGrid: View {
       case .edge:
         return city.color.opacity(0.48)
       case .off:
-        return Color(red: 0.10, green: 0.10, blue: 0.11).opacity(0.62)
+        return Theme.indicatorOff.opacity(0.62)
       }
     }
     return colors.isEmpty ? [Color.black, Color.black] : colors
@@ -541,7 +547,7 @@ private struct TimelineGrid: View {
         return true
       }
       return false
-    }?.color ?? Color(red: 0.08, green: 0.08, blue: 0.09)
+    }?.color ?? Theme.handleFallback
   }
 
   private var previewCities: [City] {
